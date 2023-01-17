@@ -6,24 +6,33 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterController : MonoBehaviour
 {
-	private static readonly float MAX_VELOCITY = 25.0f;
-	private static readonly float SPEED = 800.0f;
-	private static readonly float JUMP = 8.0f;
-	private static readonly float JUMP_FALLOFF = JUMP;
+	private static readonly float WALK_SPEED = 400.0f;
+	private static readonly float RUN_SPEED = 600.0f;
+	private static readonly float AIR_SPEED = 300.0f;
+	private static readonly float JUMP_FORCE = 200.0f;
+	private static readonly float MASS = 5.0f;
+	private static readonly float INV_MASS = 1.0f / MASS;
+	private static readonly float GRAVITY = 19.6134f;
+	private static readonly float JUMP_COOLDOWN = 0.1f;
+	private static readonly int GROUND_MASK = 1 << 10;
+	private static readonly int GROUND_OBJECT_MASK = (1 << 10) | (1 << 13);
+	private static readonly int GROUND_CHECK_MASK = (1 << 10) | (1 << 13) | (1 << 14);
 
+	private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
-	private Vector3 jumpVelocity = Vector3.zero;
+	private Vector3 force = Vector3.zero;
 
 	private Vector3 gravityDirection = Vector3.down;
-	private float gravityMagnitude = 0.0f;
-	private float gravityForce = 9.8f;
 	private bool grounded = false;
 
+	private Vector3 rotation;
 	private Quaternion startRot;
 	private Quaternion endRot;
-	private float rotateTimer = -1.0f;
 
-	private float cutsceneTimer = -1.0f;
+	private float rotateTimer = 0.0f;
+	private float jumpTimer = 0.0f;
+	private float cutsceneTimer = 0.0f;
+
 	private Vector3 startPos;
 	private Vector3 endPos;
 	private Quaternion startCamX;
@@ -50,97 +59,95 @@ public class CharacterController : MonoBehaviour
 		Cursor.visible = false;
 	}
 
+	//Left click to select wall, Right click to select object and wall
+
 	void FixedUpdate()
 	{
+		jumpTimer -= Time.fixedDeltaTime;
+		cutsceneTimer -= Time.fixedDeltaTime;
+		rotateTimer -= Time.fixedDeltaTime;
+
+		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
+
 		if (PlayerStats.CanMove)
 		{
-			grounded = Physics.Raycast(groundCheck.position, -transform.up, 0.06f);
+			float speed;
+			//TODO: implement air speed
+			if (Input.GetKey(KeyCode.LeftShift)) { speed = RUN_SPEED; }
+			else { speed = WALK_SPEED; }
 
-			if (Input.GetButton("Fire2") && Input.GetButtonDown("Fire1"))
+			movement += orientation.forward * Input.GetAxis("Vertical") * speed * Time.fixedDeltaTime;
+			movement += orientation.right * Input.GetAxis("Horizontal") * speed * Time.fixedDeltaTime;
+
+			//TODO: Add velocity toward movement direction
+			if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
 			{
-				RaycastHit hit;
+				force += transform.up * JUMP_FORCE;
+				jumpTimer = JUMP_COOLDOWN;
+			}
 
-				if (Physics.Raycast(camera.position, camera.forward, out hit, 100.0f))
+			RaycastHit hit;
+			if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
+				Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_MASK))
+			{
+				Vector3 direction = GetGravityDirection(hit);
+				gravityDirection = direction;
+				startRot = transform.rotation;
+				endRot = Quaternion.FromToRotation(Vector3.up, -direction);
+				rotateTimer = 1.0f;
+			}
+
+			if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
+				Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_OBJECT_MASK))
+			{
+				if (hit.transform.tag == "Object")
 				{
-					if (hit.transform.tag == "Object")
-					{
-						selectedObject = hit.transform.gameObject.GetComponent<GravityObject>();
-					}
-					else if (hit.transform.tag == "Ground")
-					{
-						if (PlayerStats.CanSetObjectGravity && selectedObject != null)
-						{
-							selectedObject.ChangeGravity(-hit.normal);
-
-							selectedObject = null;
-						}
-						else if (PlayerStats.CanSetPlayerGravity)
-						{
-							gravityDirection = -hit.normal;
-							gravityMagnitude = 0.0f;
-
-							startRot = transform.rotation;
-							endRot = Quaternion.FromToRotation(Vector3.up, hit.normal);
-							rotateTimer = 1.0f;
-						}
-					}
-					else if (hit.transform.tag == "Anti-Ground")
-					{
-						if (PlayerStats.CanSetObjectGravity && selectedObject != null)
-						{
-							selectedObject.ChangeGravity(hit.normal);
-
-							selectedObject = null;
-						}
-						else if (PlayerStats.CanSetPlayerGravity)
-						{
-							gravityDirection = hit.normal;
-							gravityMagnitude = 0.0f;
-
-							startRot = transform.rotation;
-							endRot = Quaternion.FromToRotation(Vector3.up, -hit.normal);
-							rotateTimer = 1.0f;
-						}
-					}
+					hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
+				}
+				else if (selectedObject != null)
+				{
+					Vector3 direction = GetGravityDirection(hit);
+					selectedObject.ChangeGravity(direction);
 				}
 			}
-
-			if (rotateTimer >= 0.0f)
-			{
-				rotateTimer -= Time.fixedDeltaTime;
-				transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
-			}
-
-			velocity = Vector3.zero;
-			if (grounded) { gravityMagnitude = 0; }
-			else { gravityMagnitude = Mathf.Min(gravityMagnitude + gravityForce * Time.fixedDeltaTime, MAX_VELOCITY); }
-
-			velocity += gravityDirection * gravityMagnitude;
-
-			velocity += orientation.forward * Input.GetAxis("Vertical") * SPEED * Time.fixedDeltaTime;
-			velocity += orientation.right * Input.GetAxis("Horizontal") * SPEED * Time.fixedDeltaTime;
-
-			if (jumpVelocity.sqrMagnitude > 0.0f) { jumpVelocity -= transform.up * JUMP_FALLOFF * Time.fixedDeltaTime; }
-			else { jumpVelocity = Vector3.zero; }
-			if (grounded && Input.GetAxis("Jump") > 0.0f) { jumpVelocity = transform.up * JUMP; }
-
-			velocity += jumpVelocity;
-
-			rb.velocity = velocity;
 		}
-		else
+		else if (cutsceneTimer >= 0.0f)
 		{
-			rb.velocity = Vector3.zero;
-
-			if (cutsceneTimer >= 0.0f)
-			{
-				cutsceneTimer -= Time.fixedDeltaTime;
-				camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
-				camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
-				transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(cutsceneTimer, 0.0f));
-				transform.position = Vector3.Lerp(endPos, startPos, Mathf.Max(cutsceneTimer, 0.0f));
-			}
+			cutsceneTimer -= Time.fixedDeltaTime;
+			camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
+			camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
+			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(cutsceneTimer, 0.0f));
+			transform.position = Vector3.Lerp(endPos, startPos, Mathf.Max(cutsceneTimer, 0.0f));
 		}
+
+		if (rotateTimer >= 0.0f)
+		{
+			rotateTimer -= Time.fixedDeltaTime;
+			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
+		}
+
+		velocity += gravityDirection * GRAVITY * Time.fixedDeltaTime * MASS;                    //Apply Gravity
+		velocity += force * INV_MASS;                                                           //Apply Instant Forces
+		velocity -= velocity.normalized * velocity.sqrMagnitude * 0.3f * Time.fixedDeltaTime;   //Apply Drag
+		rb.velocity = velocity + movement;
+
+		force = Vector3.zero;
+		movement = Vector3.zero;
+	}
+
+	public Vector3 GetGravityDirection(RaycastHit hit)
+	{
+		switch (hit.transform.tag)
+		{
+			case "Ground": return -hit.normal;
+			case "Anti-Ground": return hit.normal;
+			case "Mirror-Ground":
+				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, GROUND_MASK);
+				return GetGravityDirection(newHit);
+		}
+
+		Debug.LogError($"Unkown ground type: {hit.transform.tag}");
+		return Vector3.zero;
 	}
 
 	public void SetCharacter(Vector3 position, Quaternion rotation, float camX, float camY)
