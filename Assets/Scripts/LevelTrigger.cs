@@ -21,7 +21,7 @@ public class LevelTrigger : MonoBehaviour
 		PlayerStats.CanLook = true;
 		PlayerStats.CanMove = false;
 
-		if(door != null) { door.Close(); }
+		if (door != null) { door.Close(); }
 
 		player.SetCharacter(transform.position, transform.rotation, 0.0f, 0.0f);
 

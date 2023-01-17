@@ -5,8 +5,8 @@ using UnityEngine.Events;
 
 public class ButtonTrigger : MonoBehaviour
 {
-        public UnityEvent pressEvent;
-        public UnityEvent unpressEvent;
+	public UnityEvent pressEvent;
+	public UnityEvent unpressEvent;
 
 	private void OnTriggerEnter(Collider other)
 	{

@@ -32,6 +32,7 @@ public class CharacterController : MonoBehaviour
 	private float rotateTimer = 0.0f;
 	private float jumpTimer = 0.0f;
 	private float cutsceneTimer = 0.0f;
+	private bool cutscene = false;
 
 	private Vector3 startPos;
 	private Vector3 endPos;
@@ -91,10 +92,13 @@ public class CharacterController : MonoBehaviour
 				Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_MASK))
 			{
 				Vector3 direction = GetGravityDirection(hit);
-				gravityDirection = direction;
-				startRot = transform.rotation;
-				endRot = Quaternion.FromToRotation(Vector3.up, -direction);
-				rotateTimer = 1.0f;
+				if (direction != Vector3.zero)
+				{
+					gravityDirection = direction;
+					startRot = transform.rotation;
+					endRot = Quaternion.FromToRotation(Vector3.up, -direction);
+					rotateTimer = 1.0f;
+				}
 			}
 
 			if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
@@ -107,17 +111,39 @@ public class CharacterController : MonoBehaviour
 				else if (selectedObject != null)
 				{
 					Vector3 direction = GetGravityDirection(hit);
-					selectedObject.ChangeGravity(direction);
+					if (direction != Vector3.zero)
+					{
+						selectedObject.ChangeGravity(direction);
+					}
 				}
 			}
+
+			velocity += gravityDirection * GRAVITY * Time.fixedDeltaTime * MASS;                    //Apply Gravity
+			velocity += force * INV_MASS;                                                           //Apply Instant Forces
+			velocity -= velocity.normalized * velocity.sqrMagnitude * 0.3f * Time.fixedDeltaTime;   //Apply Drag
+			rb.velocity = velocity + movement;
 		}
-		else if (cutsceneTimer >= 0.0f)
+		else if (cutsceneTimer > 0.0f)
 		{
 			cutsceneTimer -= Time.fixedDeltaTime;
 			camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
 			camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
 			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(cutsceneTimer, 0.0f));
 			transform.position = Vector3.Lerp(endPos, startPos, Mathf.Max(cutsceneTimer, 0.0f));
+
+			velocity = Vector3.zero;
+			rb.velocity = velocity;
+		}
+		else if (cutscene)
+		{
+			cutscene = false;
+			camera.localRotation = endCamX;
+			camera.parent.localRotation = endCamY;
+			transform.rotation = endRot;
+			transform.position = endPos;
+
+			velocity = Vector3.zero;
+			rb.velocity = velocity;
 		}
 
 		if (rotateTimer >= 0.0f)
@@ -125,11 +151,6 @@ public class CharacterController : MonoBehaviour
 			rotateTimer -= Time.fixedDeltaTime;
 			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
 		}
-
-		velocity += gravityDirection * GRAVITY * Time.fixedDeltaTime * MASS;                    //Apply Gravity
-		velocity += force * INV_MASS;                                                           //Apply Instant Forces
-		velocity -= velocity.normalized * velocity.sqrMagnitude * 0.3f * Time.fixedDeltaTime;   //Apply Drag
-		rb.velocity = velocity + movement;
 
 		force = Vector3.zero;
 		movement = Vector3.zero;
@@ -144,6 +165,7 @@ public class CharacterController : MonoBehaviour
 			case "Mirror-Ground":
 				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, GROUND_MASK);
 				return GetGravityDirection(newHit);
+			case "Untagged": return Vector3.zero;
 		}
 
 		Debug.LogError($"Unkown ground type: {hit.transform.tag}");
@@ -162,5 +184,6 @@ public class CharacterController : MonoBehaviour
 		endCamY = Quaternion.Euler(Vector3.up * camY);
 
 		cutsceneTimer = 1.0f;
+		cutscene = true;
 	}
 }

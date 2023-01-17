@@ -24,7 +24,7 @@ public class AudioTrigger : MonoBehaviour
 			played = playOnce;
 
 			StartCoroutine(Wait(delay));
-			if(useSpeakers) { loader.PlayDialogue(clip); }
+			if (useSpeakers) { loader.PlayDialogue(clip); }
 			else { loader.PlaySFX(clip); }
 		}
 	}

@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Doorway : MonoBehaviour
 {
-        [SerializeField] bool openOnProximity = true;
-        [SerializeField] Transform leftDoor;
-        [SerializeField] Transform rightDoor;
+	[SerializeField] bool openOnProximity = true;
+	[SerializeField] Transform leftDoor;
+	[SerializeField] Transform rightDoor;
 
 	[SerializeField] AudioClip open;
 	[SerializeField] AudioClip close;
@@ -23,13 +23,13 @@ public class Doorway : MonoBehaviour
 
 	private void Update()
 	{
-		if(opened && position < 2.0f)
+		if (opened && position < 2.0f)
 		{
 			position += Time.deltaTime * 4;
 			leftDoor.position -= leftDoor.right * Time.deltaTime * 4;
 			rightDoor.position += leftDoor.right * Time.deltaTime * 4;
 		}
-		else if(!opened && position > 0.0f)
+		else if (!opened && position > 0.0f)
 		{
 			position -= Time.deltaTime * 4;
 			leftDoor.position += leftDoor.right * Time.deltaTime * 4;
@@ -51,7 +51,7 @@ public class Doorway : MonoBehaviour
 
 	private void OnTriggerEnter(Collider other)
 	{
-		if(openOnProximity && other.tag == "Player")
+		if (openOnProximity && other.tag == "Player")
 		{
 			Open();
 		}
