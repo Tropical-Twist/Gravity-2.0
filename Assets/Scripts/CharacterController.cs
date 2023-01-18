@@ -70,81 +70,9 @@ public class CharacterController : MonoBehaviour
 
 		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
 
-		if (PlayerStats.CanMove)
-		{
-			float speed;
-			//TODO: implement air speed
-			if (Input.GetKey(KeyCode.LeftShift)) { speed = RUN_SPEED; }
-			else { speed = WALK_SPEED; }
-
-			movement += orientation.forward * Input.GetAxis("Vertical") * speed * Time.fixedDeltaTime;
-			movement += orientation.right * Input.GetAxis("Horizontal") * speed * Time.fixedDeltaTime;
-
-			//TODO: Add velocity toward movement direction
-			if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
-			{
-				force += transform.up * JUMP_FORCE;
-				jumpTimer = JUMP_COOLDOWN;
-			}
-
-			RaycastHit hit;
-			if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
-				Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_MASK))
-			{
-				Vector3 direction = GetGravityDirection(hit);
-				if (direction != Vector3.zero)
-				{
-					gravityDirection = direction;
-					startRot = transform.rotation;
-					endRot = Quaternion.FromToRotation(Vector3.up, -direction);
-					rotateTimer = 1.0f;
-				}
-			}
-
-			if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
-				Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_OBJECT_MASK))
-			{
-				if (hit.transform.tag == "Object")
-				{
-					hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
-				}
-				else if (selectedObject != null)
-				{
-					Vector3 direction = GetGravityDirection(hit);
-					if (direction != Vector3.zero)
-					{
-						selectedObject.ChangeGravity(direction);
-					}
-				}
-			}
-
-			velocity += gravityDirection * GRAVITY * Time.fixedDeltaTime * MASS;                    //Apply Gravity
-			velocity += force * INV_MASS;                                                           //Apply Instant Forces
-			velocity -= velocity.normalized * velocity.sqrMagnitude * 0.3f * Time.fixedDeltaTime;   //Apply Drag
-			rb.velocity = velocity + movement;
-		}
-		else if (cutsceneTimer > 0.0f)
-		{
-			cutsceneTimer -= Time.fixedDeltaTime;
-			camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
-			camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
-			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(cutsceneTimer, 0.0f));
-			transform.position = Vector3.Lerp(endPos, startPos, Mathf.Max(cutsceneTimer, 0.0f));
-
-			velocity = Vector3.zero;
-			rb.velocity = velocity;
-		}
-		else if (cutscene)
-		{
-			cutscene = false;
-			camera.localRotation = endCamX;
-			camera.parent.localRotation = endCamY;
-			transform.rotation = endRot;
-			transform.position = endPos;
-
-			velocity = Vector3.zero;
-			rb.velocity = velocity;
-		}
+		if (cutsceneTimer > 0.0f) CutsceneMovement();
+		else if (PlayerStats.CanMove) StandardMovement();
+		else Debug.LogError("Player is not in a cutscene but movement is not enabled.");
 
 		if (rotateTimer >= 0.0f)
 		{
@@ -172,16 +100,93 @@ public class CharacterController : MonoBehaviour
 		return Vector3.zero;
 	}
 
-	public void SetCharacter(Vector3 position, Quaternion rotation, float camX, float camY)
+	public void StandardMovement()
+	{
+		float speed;
+		//TODO: implement air speed
+		if (Input.GetKey(KeyCode.LeftShift)) { speed = RUN_SPEED; }
+		else { speed = WALK_SPEED; }
+
+		movement += orientation.forward * Input.GetAxis("Vertical") * speed * Time.fixedDeltaTime;
+		movement += orientation.right * Input.GetAxis("Horizontal") * speed * Time.fixedDeltaTime;
+
+		//TODO: Add velocity toward movement direction
+		if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
+		{
+			force += transform.up * JUMP_FORCE;
+			jumpTimer = JUMP_COOLDOWN;
+		}
+
+		RaycastHit hit;
+		if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
+			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_MASK))
+		{
+			Vector3 direction = GetGravityDirection(hit);
+			if (direction != Vector3.zero)
+			{
+				gravityDirection = direction;
+				startRot = transform.rotation;
+				endRot = Quaternion.FromToRotation(Vector3.up, -direction);
+				rotateTimer = 1.0f;
+			}
+		}
+
+		if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
+			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_OBJECT_MASK))
+		{
+			if (hit.transform.tag == "Object")
+			{
+				hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
+			}
+			else if (selectedObject != null)
+			{
+				Vector3 direction = GetGravityDirection(hit);
+				if (direction != Vector3.zero)
+				{
+					selectedObject.ChangeGravity(direction);
+				}
+			}
+		}
+
+		velocity += gravityDirection * GRAVITY * Time.fixedDeltaTime * MASS;                    //Apply Gravity
+		velocity += force * INV_MASS;                                                           //Apply Instant Forces
+		velocity -= velocity.normalized * velocity.sqrMagnitude * 0.3f * Time.fixedDeltaTime;   //Apply Drag
+		rb.velocity = velocity + movement;
+	}
+
+	public void CutsceneMovement()
+	{
+		cutsceneTimer -= Time.fixedDeltaTime;
+		//camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
+		//camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
+		transform.rotation = Quaternion.Slerp(endRot, startRot, cutsceneTimer);
+		transform.position = Vector3.Lerp(endPos, startPos, cutsceneTimer);
+
+		velocity = Vector3.zero;
+		rb.velocity = velocity;
+		if (cutsceneTimer <= 0)
+		{
+			cutscene = false;
+			//camera.localRotation = endCamX;
+			//camera.parent.localRotation = endCamY;
+			transform.rotation = endRot;
+			transform.position = endPos;
+
+			velocity = Vector3.zero;
+			rb.velocity = velocity;
+		}
+	}
+
+	public void SetCharacter(Transform endTransform)
 	{
 		startRot = transform.rotation;
-		endRot = rotation;
+		endRot = endTransform.rotation;
 		startPos = transform.position;
-		endPos = position;
-		startCamX = camera.localRotation;
-		endCamX = Quaternion.Euler(Vector3.right * camX);
-		startCamY = camera.parent.localRotation;
-		endCamY = Quaternion.Euler(Vector3.up * camY);
+		endPos = endTransform.position;
+		//startCamX = camera.localRotation;
+		//endCamX = Quaternion.Euler(Vector3.right * camX);
+		//startCamY = camera.parent.localRotation;
+		//endCamY = Quaternion.Euler(Vector3.up * camY);
 
 		cutsceneTimer = 1.0f;
 		cutscene = true;
