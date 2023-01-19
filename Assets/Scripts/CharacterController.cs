@@ -14,9 +14,9 @@ public class CharacterController : MonoBehaviour
 	private static readonly float INV_MASS = 1.0f / MASS;
 	private static readonly float GRAVITY = 19.6134f;
 	private static readonly float JUMP_COOLDOWN = 0.1f;
-	private static readonly int GROUND_MASK = 1 << 10;
-	private static readonly int GROUND_OBJECT_MASK = (1 << 10) | (1 << 13);
-	private static readonly int GROUND_CHECK_MASK = (1 << 10) | (1 << 13) | (1 << 14);
+	private static readonly int GROUND_MASK = (1 << 3) | (1 << 10);
+	private static readonly int GROUND_OBJECT_MASK = (1 << 3) | (1 << 10) | (1 << 13);
+	private static readonly int GROUND_CHECK_MASK = (1 << 3) | (1 << 10) | (1 << 13) | (1 << 14);
 
 	private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
@@ -65,12 +65,9 @@ public class CharacterController : MonoBehaviour
 		audioLoader = FindObjectOfType<AudioLoader>();
 	}
 
-	//Left click to select wall, Right click to select object and wall
-
 	void FixedUpdate()
 	{
 		jumpTimer -= Time.fixedDeltaTime;
-		cutsceneTimer -= Time.fixedDeltaTime;
 		rotateTimer -= Time.fixedDeltaTime;
 
 		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
@@ -82,6 +79,7 @@ public class CharacterController : MonoBehaviour
 		if (rotateTimer >= 0.0f)
 		{
 			rotateTimer -= Time.fixedDeltaTime;
+			//tranform.LookAt()? 
 			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
 		}
 
@@ -98,6 +96,7 @@ public class CharacterController : MonoBehaviour
 			case "Mirror-Ground":
 				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, GROUND_MASK);
 				return GetGravityDirection(newHit);
+			case "Glass": return Vector3.zero;
 			case "Untagged": return Vector3.zero;
 		}
 
@@ -172,27 +171,28 @@ public class CharacterController : MonoBehaviour
 	public void CutsceneMovement()
 	{
 		cutsceneTimer -= Time.fixedDeltaTime;
-		//camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
-		//camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
-		transform.rotation = Quaternion.Slerp(endRot, startRot, cutsceneTimer);
-		transform.position = Vector3.Lerp(endPos, startPos, cutsceneTimer);
-
-		velocity = Vector3.zero;
-		rb.velocity = velocity;
-		if (cutsceneTimer <= 0)
+		if (cutsceneTimer > 0)
+		{
+			//camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
+			//camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
+			transform.rotation = Quaternion.Slerp(endRot, startRot, cutsceneTimer);
+			transform.position = Vector3.Lerp(endPos, startPos, cutsceneTimer);
+		}
+		else
 		{
 			cutscene = false;
 			//camera.localRotation = endCamX;
 			//camera.parent.localRotation = endCamY;
 			transform.rotation = endRot;
 			transform.position = endPos;
-
-			velocity = Vector3.zero;
-			rb.velocity = velocity;
+			PlayerStats.CanLook = true;
+			PlayerStats.CanMove = true;
 		}
+		velocity = Vector3.zero;
+		rb.velocity = velocity;
 	}
 
-	public void SetCharacter(Transform endTransform)
+	public void SetCharacter(Transform endTransform, float cutsceneTime)
 	{
 		startRot = transform.rotation;
 		endRot = endTransform.rotation;
@@ -203,7 +203,7 @@ public class CharacterController : MonoBehaviour
 		//startCamY = camera.parent.localRotation;
 		//endCamY = Quaternion.Euler(Vector3.up * camY);
 
-		cutsceneTimer = 1.0f;
+		cutsceneTimer = cutsceneTime;
 		cutscene = true;
 	}
 

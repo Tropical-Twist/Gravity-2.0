@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6200017366860998116}
   - component: {fileID: 6200017366860998117}
   - component: {fileID: 6200017366860998118}
-  m_Layer: 12
+  m_Layer: 10
   m_Name: Glass
   m_TagString: Glass
   m_Icon: {fileID: 0}
@@ -127,5 +127,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d9cf0b663d46de4d952b8a4a6e1c1ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  highlight: {fileID: 2100000, guid: 6e28d0951256ef444b226bae812415b4, type: 2}
   isObject: 0

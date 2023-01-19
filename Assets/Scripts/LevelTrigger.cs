@@ -23,7 +23,7 @@ public class LevelTrigger : MonoBehaviour
 
 		if (door != null) { door.Close(); }
 
-		player.SetCharacter(transform);
+		player.SetCharacter(transform, 1.0f);
 
 		StartCoroutine(WaitForLevel(2.0f));
 	}

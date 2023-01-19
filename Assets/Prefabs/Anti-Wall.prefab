@@ -127,5 +127,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d9cf0b663d46de4d952b8a4a6e1c1ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  highlight: {fileID: 2100000, guid: 6e28d0951256ef444b226bae812415b4, type: 2}
   isObject: 0
