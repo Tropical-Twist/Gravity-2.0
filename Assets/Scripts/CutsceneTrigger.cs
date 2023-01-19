@@ -5,25 +5,17 @@ using UnityEngine;
 
 public class CutsceneTrigger : MonoBehaviour
 {
-	//[SerializeField] private Vector3 position;
-	//[SerializeField] private Vector3 rotation;
 	[SerializeField] private Transform endTransform;
 	[SerializeField] private float cameraRotationX;
 	[SerializeField] private float cameraRotationY;
-	[SerializeField] private float duration;
+	[SerializeField] private float duration = 1;
 	[SerializeField] private bool canMove = false;
 	[SerializeField] private bool canLook = false;
 	[SerializeField] private bool canSkip = false;
 	[SerializeField] private KeyCode skipButton;
 
-	//private CharacterController player;
 	private bool played = false;
 	private Coroutine runScene = null;
-
-	private void Awake()
-	{
-		//player = FindObjectOfType<CharacterController>();
-	}
 
 	private void OnTriggerEnter(Collider other)
 	{
@@ -34,30 +26,30 @@ public class CutsceneTrigger : MonoBehaviour
 			PlayerStats.CanLook = canLook;
 			PlayerStats.CanMove = canMove;
 
-			player.SetCharacter(endTransform);
+			player.SetCharacter(endTransform, duration);
 
-			runScene = StartCoroutine(Wait(duration));
+			//runScene = StartCoroutine(Wait(duration));
 		}
 	}
 
-	public void Update()
-	{
-		if (runScene != null && canSkip && Input.GetKeyDown(skipButton))
-		{
-			StopCoroutine(runScene);
-			runScene = null;
-			PlayerStats.CanLook = true;
-			PlayerStats.CanMove = true;
-		}
-	}
+	//public void Update()
+	//{
+	//	if (runScene != null && canSkip && Input.GetKeyDown(skipButton))
+	//	{
+	//		StopCoroutine(runScene);
+	//		runScene = null;
+	//		PlayerStats.CanLook = true;
+	//		PlayerStats.CanMove = true;
+	//	}
+	//}
 
-	IEnumerator Wait(float amt)
-	{
-		yield return new WaitForSeconds(amt);
-		runScene = null;
-		PlayerStats.CanLook = true;
-		PlayerStats.CanMove = true;
-	}
+	//IEnumerator Wait(float amt)
+	//{
+	//	yield return new WaitForSeconds(amt);
+	//	runScene = null;
+	//	PlayerStats.CanLook = true;
+	//	PlayerStats.CanMove = true;
+	//}
 
 	private void OnDrawGizmosSelected()
 	{

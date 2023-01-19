@@ -63,7 +63,6 @@ public class CharacterController : MonoBehaviour
 	void FixedUpdate()
 	{
 		jumpTimer -= Time.fixedDeltaTime;
-		cutsceneTimer -= Time.fixedDeltaTime;
 		rotateTimer -= Time.fixedDeltaTime;
 
 		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
@@ -157,27 +156,28 @@ public class CharacterController : MonoBehaviour
 	public void CutsceneMovement()
 	{
 		cutsceneTimer -= Time.fixedDeltaTime;
-		//camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
-		//camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
-		transform.rotation = Quaternion.Slerp(endRot, startRot, cutsceneTimer);
-		transform.position = Vector3.Lerp(endPos, startPos, cutsceneTimer);
-
-		velocity = Vector3.zero;
-		rb.velocity = velocity;
-		if (cutsceneTimer <= 0)
+		if (cutsceneTimer > 0)
+		{
+			//camera.localRotation = Quaternion.Slerp(endCamX, startCamX, Mathf.Max(cutsceneTimer, 0.0f));
+			//camera.parent.localRotation = Quaternion.Slerp(endCamY, startCamY, Mathf.Max(cutsceneTimer, 0.0f));
+			transform.rotation = Quaternion.Slerp(endRot, startRot, cutsceneTimer);
+			transform.position = Vector3.Lerp(endPos, startPos, cutsceneTimer);
+		}
+		else
 		{
 			cutscene = false;
 			//camera.localRotation = endCamX;
 			//camera.parent.localRotation = endCamY;
 			transform.rotation = endRot;
 			transform.position = endPos;
-
-			velocity = Vector3.zero;
-			rb.velocity = velocity;
+			PlayerStats.CanLook = true;
+			PlayerStats.CanMove = true;
 		}
+		velocity = Vector3.zero;
+		rb.velocity = velocity;
 	}
 
-	public void SetCharacter(Transform endTransform)
+	public void SetCharacter(Transform endTransform, float cutsceneTime)
 	{
 		startRot = transform.rotation;
 		endRot = endTransform.rotation;
@@ -188,7 +188,7 @@ public class CharacterController : MonoBehaviour
 		//startCamY = camera.parent.localRotation;
 		//endCamY = Quaternion.Euler(Vector3.up * camY);
 
-		cutsceneTimer = 1.0f;
+		cutsceneTimer = cutsceneTime;
 		cutscene = true;
 	}
 }
