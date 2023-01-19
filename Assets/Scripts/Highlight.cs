@@ -11,7 +11,7 @@ public class Highlight : MonoBehaviour
 
 	private void Start()
 	{
-		renderer = GetComponent<MeshRenderer>();	
+		renderer = GetComponent<MeshRenderer>();
 	}
 
 	//TODO: Fix this

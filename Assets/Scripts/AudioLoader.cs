@@ -27,10 +27,10 @@ public class AudioLoader : MonoBehaviour
 				sfx = speaker;
 			}
 
-			if(speaker.tag == "Background")
+			if (speaker.tag == "Background")
 			{
 				background = speaker;
-				if(firstLoad)
+				if (firstLoad)
 				{
 					firstLoad = false;
 					background.Play();
@@ -41,7 +41,7 @@ public class AudioLoader : MonoBehaviour
 
 	public void PlayDialogue(AudioClip clip)
 	{
-		foreach(AudioSource speaker in speakers)
+		foreach (AudioSource speaker in speakers)
 		{
 			if (speaker.tag != "SFX" && speaker.tag != "Background")
 			{
