@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class CutsceneTrigger : MonoBehaviour
 {
-	[SerializeField] private Vector3 position;
-	[SerializeField] private Vector3 rotation;
+	//[SerializeField] private Vector3 position;
+	//[SerializeField] private Vector3 rotation;
+	[SerializeField] private Transform endTransform;
 	[SerializeField] private float cameraRotationX;
 	[SerializeField] private float cameraRotationY;
 	[SerializeField] private float duration;
@@ -15,24 +16,25 @@ public class CutsceneTrigger : MonoBehaviour
 	[SerializeField] private bool canSkip = false;
 	[SerializeField] private KeyCode skipButton;
 
-	private CharacterController player;
+	//private CharacterController player;
 	private bool played = false;
 	private Coroutine runScene = null;
 
 	private void Awake()
 	{
-		player = FindObjectOfType<CharacterController>();
+		//player = FindObjectOfType<CharacterController>();
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
-		if (!played)
+		if (other.tag.Equals("Player") && !played)
 		{
+			var player = other.GetComponent<CharacterController>();
 			played = true;
 			PlayerStats.CanLook = canLook;
 			PlayerStats.CanMove = canMove;
 
-			player.SetCharacter(position, Quaternion.Euler(rotation), cameraRotationX, cameraRotationY);
+			player.SetCharacter(endTransform);
 
 			runScene = StartCoroutine(Wait(duration));
 		}
@@ -55,5 +57,17 @@ public class CutsceneTrigger : MonoBehaviour
 		runScene = null;
 		PlayerStats.CanLook = true;
 		PlayerStats.CanMove = true;
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.red;
+		Gizmos.DrawLine(endTransform.position, endTransform.position + endTransform.right * 0.5f);
+		Gizmos.color = Color.green;
+		Gizmos.DrawLine(endTransform.position, endTransform.position + endTransform.up * 0.5f);
+		Gizmos.color = Color.blue;
+		Gizmos.DrawLine(endTransform.position, endTransform.position + endTransform.forward * 0.5f);
+		Gizmos.color = Color.white;
+		Gizmos.DrawSphere(endTransform.position, 0.1f);
 	}
 }
