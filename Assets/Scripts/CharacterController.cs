@@ -14,9 +14,9 @@ public class CharacterController : MonoBehaviour
 	private static readonly float INV_MASS = 1.0f / MASS;
 	private static readonly float GRAVITY = 19.6134f;
 	private static readonly float JUMP_COOLDOWN = 0.1f;
-	private static readonly int GROUND_MASK = 1 << 10;
-	private static readonly int GROUND_OBJECT_MASK = (1 << 10) | (1 << 13);
-	private static readonly int GROUND_CHECK_MASK = (1 << 10) | (1 << 13) | (1 << 14);
+	private static readonly int GROUND_MASK = (1 << 3) | (1 << 10);
+	private static readonly int GROUND_OBJECT_MASK = (1 << 3) | (1 << 10) | (1 << 13);
+	private static readonly int GROUND_CHECK_MASK = (1 << 3) | (1 << 10) | (1 << 13) | (1 << 14);
 
 	private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
@@ -59,8 +59,6 @@ public class CharacterController : MonoBehaviour
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
 	}
-
-	//Left click to select wall, Right click to select object and wall
 
 	void FixedUpdate()
 	{
@@ -149,6 +147,7 @@ public class CharacterController : MonoBehaviour
 		if (rotateTimer >= 0.0f)
 		{
 			rotateTimer -= Time.fixedDeltaTime;
+			//tranform.LookAt()? 
 			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
 		}
 
@@ -165,6 +164,7 @@ public class CharacterController : MonoBehaviour
 			case "Mirror-Ground":
 				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, GROUND_MASK);
 				return GetGravityDirection(newHit);
+			case "Glass": return Vector3.zero;
 			case "Untagged": return Vector3.zero;
 		}
 
