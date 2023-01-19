@@ -14,6 +14,7 @@ public class PauseController : MonoBehaviour
     void Start()
     {
         //sets pause menu to invis
+        Time.timeScale = 1;
         pauseMenu.SetActive(false);
         pauseActive = false;
     }
@@ -55,7 +56,7 @@ public class PauseController : MonoBehaviour
     public void ToRetry()
     {
         //Scene restarts but character is stuck
-        Debug.Log("Retryed");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Time.timeScale = 1;
     }
 }
