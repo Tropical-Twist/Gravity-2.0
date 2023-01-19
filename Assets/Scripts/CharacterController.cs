@@ -48,6 +48,9 @@ public class CharacterController : MonoBehaviour
 
 	private GravityObject selectedObject;
 
+	[SerializeField] private AudioSource walking;
+	private AudioLoader audioLoader;
+
 	void Start()
 	{
 		rb = GetComponent<Rigidbody>();
@@ -58,6 +61,8 @@ public class CharacterController : MonoBehaviour
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
+
+		audioLoader = FindObjectOfType<AudioLoader>();
 	}
 
 	//Left click to select wall, Right click to select object and wall
@@ -116,6 +121,16 @@ public class CharacterController : MonoBehaviour
 			force += transform.up * JUMP_FORCE;
 			jumpTimer = JUMP_COOLDOWN;
 		}
+
+		if (grounded && movement.magnitude > 0.0f && !walking.isPlaying)
+		{
+			walking.Play();
+		}
+		else if (!grounded || movement.magnitude == 0.0f)
+		{
+			walking.Stop();
+		}
+
 
 		RaycastHit hit;
 		if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
@@ -190,5 +205,21 @@ public class CharacterController : MonoBehaviour
 
 		cutsceneTimer = 1.0f;
 		cutscene = true;
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		Ray ray = new Ray(transform.position, -transform.up);
+		if (collision.collider.bounds.IntersectRay(ray))
+		{
+			if (collision.gameObject.tag == "Glass")
+			{
+				walking.clip = audioLoader.walkingGlass;
+			}
+			else
+			{
+				walking.clip = audioLoader.walkingMetal;
+			}
+		}
 	}
 }

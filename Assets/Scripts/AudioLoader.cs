@@ -9,6 +9,9 @@ public class AudioLoader : MonoBehaviour
 	private AudioSource sfx;
 	private AudioSource background;
 
+	public AudioClip walkingGlass;
+	public AudioClip walkingMetal;
+
 	private bool firstLoad = true;
 
 	private void Start()

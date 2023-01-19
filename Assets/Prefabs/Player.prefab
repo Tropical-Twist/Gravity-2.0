@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2634152411167740979}
   - component: {fileID: 5820034821702608517}
   m_Layer: 2
-  m_Name: SFX
+  m_Name: WalkingSFX
   m_TagString: SFX
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,12 +41,13 @@ AudioSource:
   m_GameObject: {fileID: 1846315758700735203}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 7631198204876010554, guid: fd2e95e311c5b5e4da32b572f6628427,
+    type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 0.1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -533,6 +534,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundCheck: {fileID: 5863532994019304680}
   orientation: {fileID: 5863532994155777472}
+  walking: {fileID: 5820034821702608517}
 --- !u!114 &7872589701518493771
 MonoBehaviour:
   m_ObjectHideFlags: 0

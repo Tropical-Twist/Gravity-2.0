@@ -558,6 +558,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cde7d1a67bb600d449a6232ebe32160c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  walkingGlass: {fileID: 8300000, guid: e2f43c81c86e8234fb5128a82a801081, type: 3}
+  walkingMetal: {fileID: 8300000, guid: d89a6bfcf86fd754f9a928f63e1ed7a3, type: 3}
 --- !u!1 &531007394
 GameObject:
   m_ObjectHideFlags: 0
