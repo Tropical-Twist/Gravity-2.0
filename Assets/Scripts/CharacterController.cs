@@ -14,9 +14,8 @@ public class CharacterController : MonoBehaviour
 	private static readonly float INV_MASS = 1.0f / MASS;
 	private static readonly float GRAVITY = 19.6134f;
 	private static readonly float JUMP_COOLDOWN = 0.1f;
-	private static readonly int GROUND_MASK = (1 << 3) | (1 << 10);
-	private static readonly int GROUND_OBJECT_MASK = (1 << 3) | (1 << 10) | (1 << 13);
-	private static readonly int GROUND_CHECK_MASK = (1 << 3) | (1 << 10) | (1 << 13) | (1 << 14);
+	private static readonly int GROUND_MASK = (1 << 6);
+	private static readonly int GROUND_OBJECT_MASK = (1 << 6) | (1 << 7);
 
 	private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
@@ -65,7 +64,7 @@ public class CharacterController : MonoBehaviour
 		jumpTimer -= Time.fixedDeltaTime;
 		rotateTimer -= Time.fixedDeltaTime;
 
-		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
+		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_OBJECT_MASK);
 
 		if (cutsceneTimer > 0.0f) CutsceneMovement();
 		else if (PlayerStats.CanMove) StandardMovement();
