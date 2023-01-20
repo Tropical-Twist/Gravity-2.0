@@ -2329,7 +2329,6 @@ MonoBehaviour:
   duration: 1
   canMove: 0
   canLook: 0
-  canSkip: 1
   skipButton: 32
 --- !u!1001 &1244192793504709740
 PrefabInstance:
