@@ -8,7 +8,6 @@ public class CharacterController : MonoBehaviour
 {
 	private static readonly float WALK_SPEED = 400.0f;
 	private static readonly float RUN_SPEED = 600.0f;
-	private static readonly float AIR_SPEED = 300.0f;
 	private static readonly float JUMP_FORCE = 200.0f;
 	private static readonly float MASS = 5.0f;
 	private static readonly float INV_MASS = 1.0f / MASS;
@@ -25,21 +24,15 @@ public class CharacterController : MonoBehaviour
 	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
 
-	private Vector3 rotation;
 	private Quaternion startRot;
 	private Quaternion endRot;
 
 	private float rotateTimer = 0.0f;
 	private float jumpTimer = 0.0f;
 	private float cutsceneTimer = 0.0f;
-	private bool cutscene = false;
 
 	private Vector3 startPos;
 	private Vector3 endPos;
-	private Quaternion startCamX;
-	private Quaternion endCamX;
-	private Quaternion startCamY;
-	private Quaternion endCamY;
 
 	private Rigidbody rb;
 	[SerializeField] private Transform groundCheck;
@@ -165,7 +158,6 @@ public class CharacterController : MonoBehaviour
 		}
 		else
 		{
-			cutscene = false;
 			//camera.localRotation = endCamX;
 			//camera.parent.localRotation = endCamY;
 			transform.rotation = endRot;
@@ -189,6 +181,5 @@ public class CharacterController : MonoBehaviour
 		//endCamY = Quaternion.Euler(Vector3.up * camY);
 
 		cutsceneTimer = cutsceneTime;
-		cutscene = true;
 	}
 }
