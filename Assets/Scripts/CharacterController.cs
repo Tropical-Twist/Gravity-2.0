@@ -13,7 +13,7 @@ public class CharacterController : MonoBehaviour
 	private static readonly float MASS = 5.0f;
 	private static readonly float INV_MASS = 1.0f / MASS;
 	private static readonly float GRAVITY = 19.6134f;
-	private static readonly float JUMP_COOLDOWN = 0.1f;
+	private static readonly float JUMP_COOLDOWN = 0.6f;
 	private static readonly int GROUND_MASK = (1 << 3) | (1 << 10);
 	private static readonly int GROUND_OBJECT_MASK = (1 << 3) | (1 << 10) | (1 << 13);
 	private static readonly int GROUND_CHECK_MASK = (1 << 3) | (1 << 10) | (1 << 13) | (1 << 14);
@@ -21,6 +21,7 @@ public class CharacterController : MonoBehaviour
 	private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
 	private Vector3 force = Vector3.zero;
+	private float debugHighestSpeed = 0;
 
 	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
@@ -49,6 +50,7 @@ public class CharacterController : MonoBehaviour
 	private GravityObject selectedObject;
 
 	[SerializeField] private AudioSource walking;
+	[SerializeField] private AudioSource falling;
 	private AudioLoader audioLoader;
 
 	void Start()
@@ -72,6 +74,11 @@ public class CharacterController : MonoBehaviour
 
 		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
 
+		if (velocity.magnitude > debugHighestSpeed)
+		{
+			debugHighestSpeed = velocity.magnitude;
+		}
+
 		if (cutsceneTimer > 0.0f) CutsceneMovement();
 		else if (PlayerStats.CanMove) StandardMovement();
 		else Debug.LogError("Player is not in a cutscene but movement is not enabled.");
@@ -85,6 +92,7 @@ public class CharacterController : MonoBehaviour
 
 		force = Vector3.zero;
 		movement = Vector3.zero;
+		Debug.Log(debugHighestSpeed);
 	}
 
 	public Vector3 GetGravityDirection(RaycastHit hit)
@@ -215,11 +223,14 @@ public class CharacterController : MonoBehaviour
 			if (collision.gameObject.tag == "Glass")
 			{
 				walking.clip = audioLoader.walkingGlass;
+				falling.clip = audioLoader.walkingGlass;
 			}
 			else
 			{
 				walking.clip = audioLoader.walkingMetal;
+				falling.clip = audioLoader.walkingMetal;
 			}
+			falling.PlayOneShot(falling.clip, Mathf.Lerp(0.075f, 0.125f, velocity.magnitude) * 10.0f);
 		}
 	}
 }
