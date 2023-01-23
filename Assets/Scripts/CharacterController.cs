@@ -223,23 +223,4 @@ public class CharacterController : MonoBehaviour
 			falling.PlayOneShot(falling.clip, Mathf.Lerp(0.075f, 0.125f, velocity.magnitude) * 10.0f);
 		}
 	}
-
-	private void OnCollisionEnter(Collision collision)
-	{
-		Ray ray = new Ray(transform.position, -transform.up);
-		if (collision.collider.bounds.IntersectRay(ray))
-		{
-			if (collision.gameObject.tag == "Glass")
-			{
-				walking.clip = audioLoader.walkingGlass;
-				falling.clip = audioLoader.walkingGlass;
-			}
-			else
-			{
-				walking.clip = audioLoader.walkingMetal;
-				falling.clip = audioLoader.walkingMetal;
-			}
-			falling.PlayOneShot(falling.clip, Mathf.Lerp(0.075f, 0.125f, velocity.magnitude) * 10.0f);
-		}
-	}
 }
