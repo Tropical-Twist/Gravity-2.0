@@ -6,7 +6,7 @@ public class SelectionRaycaster : MonoBehaviour
 {
 	private static readonly int WALL_OBJECT_MASK = (1 << 6) | (1 << 7);
 
-	private Outline selectedObject;
+	private GameObject selectedObject;
 	private new Transform camera;
 
 	void Start()
@@ -17,41 +17,61 @@ public class SelectionRaycaster : MonoBehaviour
 	void Update()
 	{
 		RaycastHit hit;
-		if (Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
+		Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+		if (Physics.Raycast(ray, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
 		{
 			Transform objectHit = hit.transform;
-			if (objectHit.TryGetComponent(out Outline outline))
+
+			//200, 90, 90
+			if (objectHit.gameObject.layer == 6)
 			{
-				//200, 90, 90
-				//TODO: Check for wall or object, walls get OutlineAll and objects get OutlineAndSilhouette
 				if (selectedObject == null)
 				{
-					selectedObject = outline;
-					selectedObject.OutlineColor = Color.red;
-					selectedObject.OutlineMode = Outline.Mode.OutlineAll;
-					selectedObject.OutlineWidth = 5.0f;
+					selectedObject = objectHit.gameObject;
+					Outline ol = selectedObject.AddComponent<Outline>();
+					ol.OutlineColor = Color.red;
+					ol.OutlineMode = Outline.Mode.OutlineAll;
+					ol.OutlineWidth = 5.0f;
 				}
-				else if(selectedObject != objectHit)
+				else if (selectedObject != objectHit.gameObject)
 				{
-					selectedObject.OutlineMode = Outline.Mode.OutlineVisible;
-					selectedObject.OutlineWidth = 0.0f;
-					selectedObject = outline;
-					selectedObject.OutlineColor = Color.red;
-					selectedObject.OutlineMode = Outline.Mode.OutlineAll;
-					selectedObject.OutlineWidth = 5.0f;
+					Destroy(selectedObject.GetComponent<Outline>());
+					selectedObject = objectHit.gameObject;
+					Outline ol = selectedObject.AddComponent<Outline>();
+					ol.OutlineColor = Color.red;
+					ol.OutlineMode = Outline.Mode.OutlineAll;
+					ol.OutlineWidth = 5.0f;
 				}
 			}
-			else if(selectedObject != null)
+			else if(objectHit.tag == "Object")
 			{
-				selectedObject.OutlineMode = Outline.Mode.OutlineVisible;
-				selectedObject.OutlineWidth = 0.0f;
+				if(selectedObject == null)
+				{
+					selectedObject = objectHit.gameObject;
+					Outline ol = selectedObject.AddComponent<Outline>();
+					ol.OutlineColor = Color.red;
+					ol.OutlineMode = Outline.Mode.OutlineAndSilhouette;
+					ol.OutlineWidth = 5.0f;
+				}
+				else if (selectedObject != objectHit.gameObject)
+				{
+					Destroy(selectedObject.GetComponent<Outline>());
+					selectedObject = objectHit.gameObject;
+					Outline ol = selectedObject.AddComponent<Outline>();
+					ol.OutlineColor = Color.red;
+					ol.OutlineMode = Outline.Mode.OutlineAndSilhouette;
+					ol.OutlineWidth = 5.0f;
+				}
+			}
+			else if (selectedObject != null)
+			{
+				Destroy(selectedObject.GetComponent<Outline>());
 				selectedObject = null;
 			}
 		}
 		else if (selectedObject != null)
 		{
-			selectedObject.OutlineMode = Outline.Mode.OutlineVisible;
-			selectedObject.OutlineWidth = 0.0f;
+			Destroy(selectedObject.GetComponent<Outline>());
 			selectedObject = null;
 		}
 	}
