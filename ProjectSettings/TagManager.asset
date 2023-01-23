@@ -15,16 +15,16 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Outline
+  - Player
   - Water
   - UI
+  - Wall
+  - Object
   - 
   - 
   - 
-  - Player
-  - Ground
-  - Highlight
-  - Glass
+  - 
+  - 
   - 
   - 
   - 

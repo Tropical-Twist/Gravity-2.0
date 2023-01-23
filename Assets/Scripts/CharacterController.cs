@@ -8,15 +8,13 @@ public class CharacterController : MonoBehaviour
 {
 	private static readonly float WALK_SPEED = 400.0f;
 	private static readonly float RUN_SPEED = 600.0f;
-	private static readonly float AIR_SPEED = 300.0f;
 	private static readonly float JUMP_FORCE = 200.0f;
 	private static readonly float MASS = 5.0f;
 	private static readonly float INV_MASS = 1.0f / MASS;
 	private static readonly float GRAVITY = 19.6134f;
 	private static readonly float JUMP_COOLDOWN = 0.6f;
-	private static readonly int GROUND_MASK = (1 << 3) | (1 << 10);
-	private static readonly int GROUND_OBJECT_MASK = (1 << 3) | (1 << 10) | (1 << 13);
-	private static readonly int GROUND_CHECK_MASK = (1 << 3) | (1 << 10) | (1 << 13) | (1 << 14);
+	private static readonly int GROUND_MASK = (1 << 6);
+	private static readonly int GROUND_OBJECT_MASK = (1 << 6) | (1 << 7);
 
 	private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
@@ -26,21 +24,15 @@ public class CharacterController : MonoBehaviour
 	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
 
-	private Vector3 rotation;
 	private Quaternion startRot;
 	private Quaternion endRot;
 
 	private float rotateTimer = 0.0f;
 	private float jumpTimer = 0.0f;
 	private float cutsceneTimer = 0.0f;
-	private bool cutscene = false;
 
 	private Vector3 startPos;
 	private Vector3 endPos;
-	private Quaternion startCamX;
-	private Quaternion endCamX;
-	private Quaternion startCamY;
-	private Quaternion endCamY;
 
 	private Rigidbody rb;
 	[SerializeField] private Transform groundCheck;
@@ -72,7 +64,7 @@ public class CharacterController : MonoBehaviour
 		jumpTimer -= Time.fixedDeltaTime;
 		rotateTimer -= Time.fixedDeltaTime;
 
-		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_CHECK_MASK);
+		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_OBJECT_MASK);
 
 		if (velocity.magnitude > debugHighestSpeed)
 		{
@@ -188,7 +180,6 @@ public class CharacterController : MonoBehaviour
 		}
 		else
 		{
-			cutscene = false;
 			//camera.localRotation = endCamX;
 			//camera.parent.localRotation = endCamY;
 			transform.rotation = endRot;
@@ -212,7 +203,25 @@ public class CharacterController : MonoBehaviour
 		//endCamY = Quaternion.Euler(Vector3.up * camY);
 
 		cutsceneTimer = cutsceneTime;
-		cutscene = true;
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		Ray ray = new Ray(transform.position, -transform.up);
+		if (collision.collider.bounds.IntersectRay(ray))
+		{
+			if (collision.gameObject.tag == "Glass")
+			{
+				walking.clip = audioLoader.walkingGlass;
+				falling.clip = audioLoader.walkingGlass;
+			}
+			else
+			{
+				walking.clip = audioLoader.walkingMetal;
+				falling.clip = audioLoader.walkingMetal;
+			}
+			falling.PlayOneShot(falling.clip, Mathf.Lerp(0.075f, 0.125f, velocity.magnitude) * 10.0f);
+		}
 	}
 
 	private void OnCollisionEnter(Collision collision)
