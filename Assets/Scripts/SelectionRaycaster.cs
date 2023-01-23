@@ -6,7 +6,7 @@ public class SelectionRaycaster : MonoBehaviour
 {
 	private static readonly int WALL_OBJECT_MASK = (1 << 6) | (1 << 7);
 
-	private GameObject selectedObject;
+	private Outline selectedObject;
 	private new Transform camera;
 
 	void Start()
@@ -18,60 +18,34 @@ public class SelectionRaycaster : MonoBehaviour
 	{
 		RaycastHit hit;
 		Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-		if (Physics.Raycast(ray, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
+		if (PlayerStats.CanSetPlayerGravity && Physics.Raycast(ray, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
 		{
-			Transform objectHit = hit.transform;
+			Outline objectHit = hit.transform.gameObject.GetComponent<Outline>();
 
 			//200, 90, 90
-			if (objectHit.gameObject.layer == 6)
+			if ((objectHit.gameObject.layer == 6 && objectHit.tag != "Glass") || (objectHit.tag == "Object" && PlayerStats.CanSetObjectGravity))
 			{
 				if (selectedObject == null)
 				{
-					selectedObject = objectHit.gameObject;
-					Outline ol = selectedObject.AddComponent<Outline>();
-					ol.OutlineColor = Color.red;
-					ol.OutlineMode = Outline.Mode.OutlineAll;
-					ol.OutlineWidth = 5.0f;
+					selectedObject = objectHit;
+					selectedObject.enabled = true;
 				}
-				else if (selectedObject != objectHit.gameObject)
+				else if (selectedObject != objectHit)
 				{
-					Destroy(selectedObject.GetComponent<Outline>());
-					selectedObject = objectHit.gameObject;
-					Outline ol = selectedObject.AddComponent<Outline>();
-					ol.OutlineColor = Color.red;
-					ol.OutlineMode = Outline.Mode.OutlineAll;
-					ol.OutlineWidth = 5.0f;
-				}
-			}
-			else if(objectHit.tag == "Object")
-			{
-				if(selectedObject == null)
-				{
-					selectedObject = objectHit.gameObject;
-					Outline ol = selectedObject.AddComponent<Outline>();
-					ol.OutlineColor = Color.red;
-					ol.OutlineMode = Outline.Mode.OutlineAndSilhouette;
-					ol.OutlineWidth = 5.0f;
-				}
-				else if (selectedObject != objectHit.gameObject)
-				{
-					Destroy(selectedObject.GetComponent<Outline>());
-					selectedObject = objectHit.gameObject;
-					Outline ol = selectedObject.AddComponent<Outline>();
-					ol.OutlineColor = Color.red;
-					ol.OutlineMode = Outline.Mode.OutlineAndSilhouette;
-					ol.OutlineWidth = 5.0f;
+					selectedObject.enabled = false;
+					selectedObject = objectHit;
+					selectedObject.enabled = true;
 				}
 			}
 			else if (selectedObject != null)
 			{
-				Destroy(selectedObject.GetComponent<Outline>());
+				selectedObject.enabled = false;
 				selectedObject = null;
 			}
 		}
 		else if (selectedObject != null)
 		{
-			Destroy(selectedObject.GetComponent<Outline>());
+			selectedObject.enabled = false;
 			selectedObject = null;
 		}
 	}
