@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -9,6 +10,7 @@ public class GravityObject : MonoBehaviour
 	private static readonly float MAX_VELOCITY = 25.0f;
 
 	[SerializeField] private Vector3 startingDirection = Vector3.down;
+	[SerializeField] private AudioSource audio;
 
 	private Vector3 gravityDirection;
 	private float gravityMagnitude = 0.0f;
@@ -39,5 +41,13 @@ public class GravityObject : MonoBehaviour
 	{
 		gravityDirection = direction;
 		gravityMagnitude = 0.0f;
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		if (collision.gameObject.tag == "Ground")
+		{
+			audio.PlayOneShot(audio.clip, Mathf.Lerp(0.275f, 0.325f, rb.velocity.magnitude) * 10.0f);
+		}
 	}
 }
