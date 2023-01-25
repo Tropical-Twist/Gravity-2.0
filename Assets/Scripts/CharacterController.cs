@@ -16,24 +16,18 @@ public class CharacterController : MonoBehaviour
 	private float jumpForce = 200.0f;
 	[SerializeField]
 	private float decelerationFactor = 0.8f;
-	//private static readonly float MASS = 5.0f;
-	//private static readonly float INV_MASS = 1.0f / MASS;
-	//private static readonly float GRAVITY = 19.6134f;
-	private static readonly float JUMP_COOLDOWN = 0.1f;
-	//private static readonly int GROUND_MASK = (1 << 6);
-	//private static readonly int GROUND_OBJECT_MASK = (1 << 6) | (1 << 7);
+	[SerializeField]
+	private float jumpCooldown = 0.1f;
+	[SerializeField]
+	private Transform hand;
 
-	//private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
 	private bool grounded = false;
-
 	private Quaternion startRot;
 	private Quaternion endRot;
-
 	private float rotateTimer = 0.0f;
 	private float jumpTimer = 0.0f;
 	private float cutsceneTimer = 0.0f;
-
 	private Vector3 startPos;
 	private Vector3 endPos;
 
@@ -41,6 +35,7 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private Transform groundCheck;
 	[SerializeField] private Transform orientation;
 	private new Transform camera;
+	private LineRenderer lineRenderer;
 
 	private GravityObject selectedObject;
 
@@ -51,6 +46,8 @@ public class CharacterController : MonoBehaviour
 		rb.detectCollisions = true;
 
 		camera = Camera.main.transform;
+		lineRenderer = GetComponent<LineRenderer>();
+		lineRenderer.enabled = false;
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
@@ -92,12 +89,25 @@ public class CharacterController : MonoBehaviour
 		return Vector3.zero;
 	}
 
+	private bool wasShooting = false;
+	RaycastHit hit;
 	public void StandardMovement()
 	{
-		// Change gravity
-		if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
-			Physics.Raycast(camera.position, camera.forward, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
+		// Show line
+		if (PlayerStats.CanSetPlayerGravity && Input.GetButton("Fire1") &&
+			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
 		{
+			wasShooting = true;
+			lineRenderer.enabled = true;
+			lineRenderer.SetPosition(0, hand.position);
+			lineRenderer.SetPosition(1, hit.point);
+		}
+		// Change gravity
+		else if (wasShooting)
+		{
+			if (hit.collider == null) Debug.Break(); // This is here because it will sometimes happen very rarely but it's hard to catch.
+			wasShooting = false;
+			lineRenderer.enabled = false;
 			Vector3 direction = GetGravityDirection(hit);
 			if (direction != Vector3.zero)
 			{
@@ -130,7 +140,7 @@ public class CharacterController : MonoBehaviour
 		if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
 		{
 			rb.AddRelativeForce(Vector3.up * jumpForce, ForceMode.Impulse);
-			jumpTimer = JUMP_COOLDOWN;
+			jumpTimer = jumpCooldown;
 		}
 
 		// Speed is calculated whether or not player is sprinting.
