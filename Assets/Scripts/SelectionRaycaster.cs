@@ -18,35 +18,31 @@ public class SelectionRaycaster : MonoBehaviour
 	{
 		RaycastHit hit;
 		Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-		if (PlayerStats.CanSetPlayerGravity && Physics.Raycast(ray, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
+		if (PlayerStats.CanSetPlayerGravity && Physics.Raycast(ray, out hit, Mathf.Infinity, WALL_OBJECT_MASK) &&
+			hit.transform.gameObject.TryGetComponent<Outline>(out Outline objectHit))
 		{
-			Outline objectHit = hit.transform.gameObject.GetComponent<Outline>();
-
-			//200, 90, 90
-			if ((objectHit.gameObject.layer == 6 && objectHit.tag != "Glass") || (objectHit.tag == "Object" && PlayerStats.CanSetObjectGravity))
+			if (selectedObject == null)
 			{
-				if (selectedObject == null)
-				{
-					selectedObject = objectHit;
-					selectedObject.enabled = true;
-				}
-				else if (selectedObject != objectHit)
-				{
-					selectedObject.enabled = false;
-					selectedObject = objectHit;
-					selectedObject.enabled = true;
-				}
+				selectedObject = objectHit;
+				selectedObject.enabled = true;
 			}
-			else if (selectedObject != null)
+			else if (selectedObject != objectHit)
 			{
-				selectedObject.enabled = false;
-				selectedObject = null;
+				selectedObject.enabled = selectedObject.selected;
+				selectedObject = objectHit;
+				selectedObject.enabled = true;
 			}
 		}
 		else if (selectedObject != null)
 		{
-			selectedObject.enabled = false;
+			selectedObject.enabled = selectedObject.selected;
 			selectedObject = null;
 		}
+	}
+
+	public void Deselect(Outline obj)
+	{
+		obj.selected = false;
+		obj.enabled = false;
 	}
 }
