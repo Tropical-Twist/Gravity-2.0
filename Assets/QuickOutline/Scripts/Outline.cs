@@ -89,6 +89,9 @@ public class Outline : MonoBehaviour
 
 	private bool needsUpdate;
 
+	[HideInInspector]
+	public bool selected = false;
+
 	void Awake()
 	{
 

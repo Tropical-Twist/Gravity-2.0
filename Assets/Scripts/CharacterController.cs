@@ -124,7 +124,9 @@ public class CharacterController : MonoBehaviour
 		{
 			if (hit.transform.tag == "Object")
 			{
+				if(selectedObject != null) { Camera.main.GetComponent<SelectionRaycaster>().Deselect(selectedObject.GetComponent<Outline>()); }
 				hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
+				selectedObject.GetComponent<Outline>().selected = true;
 			}
 			else if (selectedObject != null)
 			{
