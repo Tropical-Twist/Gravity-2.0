@@ -6,21 +6,25 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class CharacterController : MonoBehaviour
 {
-	private static readonly float WALK_SPEED = 400.0f;
-	private static readonly float RUN_SPEED = 600.0f;
-	private static readonly float JUMP_FORCE = 200.0f;
-	private static readonly float MASS = 5.0f;
-	private static readonly float INV_MASS = 1.0f / MASS;
-	private static readonly float GRAVITY = 19.6134f;
+	[SerializeField]
+	private float walkAcceleration = 400.0f;
+	[SerializeField]
+	private float runAcceleration = 600.0f;
+	[SerializeField]
+	private float lateralVelocityLimit = 1.0f;
+	[SerializeField]
+	private float jumpForce = 200.0f;
+	[SerializeField]
+	private float decelerationFactor = 0.8f;
+	//private static readonly float MASS = 5.0f;
+	//private static readonly float INV_MASS = 1.0f / MASS;
+	//private static readonly float GRAVITY = 19.6134f;
 	private static readonly float JUMP_COOLDOWN = 0.1f;
-	private static readonly int GROUND_MASK = (1 << 6);
-	private static readonly int GROUND_OBJECT_MASK = (1 << 6) | (1 << 7);
+	//private static readonly int GROUND_MASK = (1 << 6);
+	//private static readonly int GROUND_OBJECT_MASK = (1 << 6) | (1 << 7);
 
-	private Vector3 movement = Vector3.zero;
+	//private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
-	private Vector3 force = Vector3.zero;
-
-	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
 
 	private Quaternion startRot;
@@ -57,7 +61,7 @@ public class CharacterController : MonoBehaviour
 		jumpTimer -= Time.fixedDeltaTime;
 		rotateTimer -= Time.fixedDeltaTime;
 
-		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, GROUND_OBJECT_MASK);
+		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, LayerMask.GetMask("Wall", "Object"));
 
 		if (cutsceneTimer > 0.0f) CutsceneMovement();
 		else if (PlayerStats.CanMove) StandardMovement();
@@ -69,9 +73,6 @@ public class CharacterController : MonoBehaviour
 			//tranform.LookAt()? 
 			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
 		}
-
-		force = Vector3.zero;
-		movement = Vector3.zero;
 	}
 
 	public Vector3 GetGravityDirection(RaycastHit hit)
@@ -81,7 +82,7 @@ public class CharacterController : MonoBehaviour
 			case "Ground": return -hit.normal;
 			case "Anti-Ground": return hit.normal;
 			case "Mirror-Ground":
-				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, GROUND_MASK);
+				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, LayerMask.GetMask("Ground"));
 				return GetGravityDirection(newHit);
 			case "Glass": return Vector3.zero;
 			case "Untagged": return Vector3.zero;
@@ -93,37 +94,23 @@ public class CharacterController : MonoBehaviour
 
 	public void StandardMovement()
 	{
-		float speed;
-		//TODO: implement air speed
-		if (Input.GetKey(KeyCode.LeftShift)) { speed = RUN_SPEED; }
-		else { speed = WALK_SPEED; }
-
-		movement += orientation.forward * Input.GetAxis("Vertical") * speed * Time.fixedDeltaTime;
-		movement += orientation.right * Input.GetAxis("Horizontal") * speed * Time.fixedDeltaTime;
-
-		//TODO: Add velocity toward movement direction
-		if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
-		{
-			force += transform.up * JUMP_FORCE;
-			jumpTimer = JUMP_COOLDOWN;
-		}
-
-		RaycastHit hit;
+		// Change gravity
 		if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
-			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_MASK))
+			Physics.Raycast(camera.position, camera.forward, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
 		{
 			Vector3 direction = GetGravityDirection(hit);
 			if (direction != Vector3.zero)
 			{
-				gravityDirection = direction;
+				//gravityDirection = direction;
 				startRot = transform.rotation;
 				endRot = Quaternion.FromToRotation(Vector3.up, -direction);
 				rotateTimer = 1.0f;
 			}
 		}
 
+		// Change an object's gravity
 		if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
-			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, GROUND_OBJECT_MASK))
+			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall", "Object")))
 		{
 			if (hit.transform.tag == "Object")
 			{
@@ -141,10 +128,28 @@ public class CharacterController : MonoBehaviour
 			}
 		}
 
-		velocity += gravityDirection * GRAVITY * Time.fixedDeltaTime * MASS;                    //Apply Gravity
-		velocity += force * INV_MASS;                                                           //Apply Instant Forces
-		velocity -= velocity.normalized * velocity.sqrMagnitude * 0.3f * Time.fixedDeltaTime;   //Apply Drag
-		rb.velocity = velocity + movement;
+		// Jump
+		if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
+		{
+			rb.AddRelativeForce(Vector3.up * jumpForce, ForceMode.Impulse);
+			jumpTimer = JUMP_COOLDOWN;
+		}
+
+		// Speed is calculated whether or not player is sprinting.
+		float acceleration;
+		if (Input.GetKey(KeyCode.LeftShift)) { acceleration = runAcceleration; }
+		else { acceleration = walkAcceleration; }
+
+		// Lateral Movement
+		float sideSpeed = Input.GetAxis("Horizontal");
+		float forwardSpeed = Input.GetAxis("Vertical");
+		// Apply lateral force.
+		rb.AddRelativeForce(new Vector3(sideSpeed, 0, forwardSpeed).normalized * acceleration * Time.fixedDeltaTime, ForceMode.Force);
+
+		// Gravity
+		rb.AddRelativeForce(Physics.gravity, ForceMode.Force);
+		// Apply drag twice if there is no input so user slows faster.
+		if (sideSpeed == 0 && forwardSpeed == 0) rb.velocity *= decelerationFactor;
 	}
 
 	public void CutsceneMovement()
