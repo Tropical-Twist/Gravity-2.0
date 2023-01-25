@@ -17,41 +17,39 @@ public class SelectionRaycaster : MonoBehaviour
 	void Update()
 	{
 		RaycastHit hit;
-		if (Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
+		Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+		if (PlayerStats.CanSetPlayerGravity && Physics.Raycast(ray, out hit, Mathf.Infinity, WALL_OBJECT_MASK))
 		{
-			Transform objectHit = hit.transform;
-			if (objectHit.TryGetComponent(out Outline outline))
+			Outline objectHit = hit.transform.gameObject.GetComponent<Outline>();
+			if (objectHit == null)
 			{
-				//200, 90, 90
-				//TODO: Check for wall or object, walls get OutlineAll and objects get OutlineAndSilhouette
+				Debug.LogError("Raycast hit an object but it didn't have outline component.");
+				return;
+			}
+			//200, 90, 90
+			if ((objectHit.gameObject.layer == 6 && objectHit.tag != "Glass") || (objectHit.tag == "Object" && PlayerStats.CanSetObjectGravity))
+			{
 				if (selectedObject == null)
 				{
-					selectedObject = outline;
-					selectedObject.OutlineColor = Color.red;
-					selectedObject.OutlineMode = Outline.Mode.OutlineAll;
-					selectedObject.OutlineWidth = 5.0f;
+					selectedObject = objectHit;
+					selectedObject.enabled = true;
 				}
-				else if(selectedObject != objectHit)
+				else if (selectedObject != objectHit)
 				{
-					selectedObject.OutlineMode = Outline.Mode.OutlineVisible;
-					selectedObject.OutlineWidth = 0.0f;
-					selectedObject = outline;
-					selectedObject.OutlineColor = Color.red;
-					selectedObject.OutlineMode = Outline.Mode.OutlineAll;
-					selectedObject.OutlineWidth = 5.0f;
+					selectedObject.enabled = false;
+					selectedObject = objectHit;
+					selectedObject.enabled = true;
 				}
 			}
-			else if(selectedObject != null)
+			else if (selectedObject != null)
 			{
-				selectedObject.OutlineMode = Outline.Mode.OutlineVisible;
-				selectedObject.OutlineWidth = 0.0f;
+				selectedObject.enabled = false;
 				selectedObject = null;
 			}
 		}
 		else if (selectedObject != null)
 		{
-			selectedObject.OutlineMode = Outline.Mode.OutlineVisible;
-			selectedObject.OutlineWidth = 0.0f;
+			selectedObject.enabled = false;
 			selectedObject = null;
 		}
 	}

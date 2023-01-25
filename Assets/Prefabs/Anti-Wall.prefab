@@ -13,14 +13,13 @@ GameObject:
   - component: {fileID: 2327019462070035773}
   - component: {fileID: 2327019462070035762}
   - component: {fileID: 2327019462070035763}
-  - component: {fileID: 2327019462070035760}
-  - component: {fileID: 7533935264921244598}
+  - component: {fileID: -2407137114297931941}
   m_Layer: 6
   m_Name: Anti-Wall
   m_TagString: Anti-Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &2327019462070035761
 Transform:
@@ -116,20 +115,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 1
---- !u!114 &2327019462070035760
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2327019462070035766}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d9cf0b663d46de4d952b8a4a6e1c1ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isObject: 0
---- !u!114 &7533935264921244598
+--- !u!114 &-2407137114297931941
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,7 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   outlineMode: 0
   outlineColor: {r: 1, g: 0, b: 0, a: 1}
-  outlineWidth: 0
+  outlineWidth: 5
   precomputeOutline: 1
   bakeKeys:
   - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
