@@ -16,12 +16,7 @@ public class CharacterController : MonoBehaviour
 	private float jumpForce = 200.0f;
 	[SerializeField]
 	private float decelerationFactor = 0.8f;
-	//private static readonly float MASS = 5.0f;
-	//private static readonly float INV_MASS = 1.0f / MASS;
-	//private static readonly float GRAVITY = 19.6134f;
-	private static readonly float JUMP_COOLDOWN = 0.6f;
-	//private static readonly int GROUND_MASK = (1 << 6);
-	//private static readonly int GROUND_OBJECT_MASK = (1 << 6) | (1 << 7);
+	private static readonly float jumpCooldown = 0.6f;
 
 	//private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
@@ -77,11 +72,6 @@ public class CharacterController : MonoBehaviour
 
 		grounded = Physics.Raycast(groundCheck.position, -transform.up, out _, 0.1f, LayerMask.GetMask("Wall", "Object"));
 
-		/*if (velocity.magnitude > debugHighestSpeed)
-		{
-			debugHighestSpeed = velocity.magnitude;
-		}*/
-
 		if (cutsceneTimer > 0.0f) CutsceneMovement();
 		else if (PlayerStats.CanMove) StandardMovement();
 		else Debug.LogError("Player is not in a cutscene but movement is not enabled.");
@@ -103,8 +93,7 @@ public class CharacterController : MonoBehaviour
 		}
 
 		force = Vector3.zero;
-		movement = Vector3.zero;
-		//Debug.Log(debugHighestSpeed);
+		//movement = Vector3.zero;
 	}
 
 	public Vector3 GetGravityDirection(RaycastHit hit)
@@ -126,26 +115,11 @@ public class CharacterController : MonoBehaviour
 
 	public void StandardMovement()
 	{
-		float speed;
-		//TODO: implement air speed
-		if (Input.GetKey(KeyCode.LeftShift)) { speed = RUN_SPEED; }
-		else { speed = WALK_SPEED; }
-
-		movement += orientation.forward * Input.GetAxis("Vertical") * speed * Time.fixedDeltaTime;
-		movement += orientation.right * Input.GetAxis("Horizontal") * speed * Time.fixedDeltaTime;
-
-		//TODO: Add velocity toward movement direction
-		if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
-		{
-			force += transform.up * JUMP_FORCE;
-			jumpTimer = JUMP_COOLDOWN;
-		}
-
-		if (grounded && movement.sqrMagnitude > 0.0f && !walking.isPlaying)
+		if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
 		{
 			walking.Play();
 		}
-		else if (!grounded || movement.sqrMagnitude == 0.0f)
+		else if (!grounded || rb.velocity.sqrMagnitude == 0.0f)
 		{
 			walking.Stop();
 		}
@@ -153,7 +127,7 @@ public class CharacterController : MonoBehaviour
 		RaycastHit hit;
 		// Change gravity
 		if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
-			Physics.Raycast(camera.position, camera.forward, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
+			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
 		{
 			AudioSource.PlayClipAtPoint(device_firing, transform.position, 0.3f);
 			Vector3 direction = GetGravityDirection(hit);
@@ -190,7 +164,7 @@ public class CharacterController : MonoBehaviour
 		if (grounded && jumpTimer < 0.0f && Input.GetAxis("Jump") > 0.0f)
 		{
 			rb.AddRelativeForce(Vector3.up * jumpForce, ForceMode.Impulse);
-			jumpTimer = JUMP_COOLDOWN;
+			jumpTimer = jumpCooldown;
 		}
 
 		// Speed is calculated whether or not player is sprinting.
@@ -205,7 +179,7 @@ public class CharacterController : MonoBehaviour
 		rb.AddRelativeForce(new Vector3(sideSpeed, 0, forwardSpeed).normalized * acceleration * Time.fixedDeltaTime, ForceMode.Force);
 
 		// Gravity
-		rb.AddRelativeForce(Physics.gravity, ForceMode.Force);
+		rb.AddRelativeForce(Physics.gravity * jumpForce * Time.fixedDeltaTime, ForceMode.Force);
 		// Apply drag twice if there is no input so user slows faster.
 		if (sideSpeed == 0 && forwardSpeed == 0) rb.velocity *= decelerationFactor;
 	}
@@ -262,7 +236,7 @@ public class CharacterController : MonoBehaviour
 				walking.clip = audioLoader.walkingMetal;
 				landing.clip = audioLoader.walkingMetal;
 			}
-			landing.PlayOneShot(landing.clip, Mathf.Lerp(0.275f, 0.325f, velocity.magnitude) * 10.0f);
+			landing.PlayOneShot(landing.clip, Mathf.Lerp(0.275f, 0.325f, rb.velocity.magnitude) * 10.0f);
 		}
 	}
 }

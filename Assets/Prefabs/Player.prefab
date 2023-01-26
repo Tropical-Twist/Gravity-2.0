@@ -837,6 +837,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1eb5d3a1861dfca42a301a52dc1777c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  walkAcceleration: 400
+  runAcceleration: 600
+  lateralVelocityLimit: 1
+  jumpForce: 50
+  decelerationFactor: 0.8
   groundCheck: {fileID: 5863532994019304680}
   orientation: {fileID: 5863532994155777472}
   walking: {fileID: 5820034821702608517}
