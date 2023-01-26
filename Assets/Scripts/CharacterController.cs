@@ -195,7 +195,7 @@ public class CharacterController : MonoBehaviour
 		rb.AddRelativeForce(new Vector3(sideSpeed, 0, forwardSpeed).normalized * acceleration * Time.fixedDeltaTime, ForceMode.Force);
 
 		// Gravity
-		rb.AddRelativeForce(Physics.gravity * jumpForce * Time.fixedDeltaTime, ForceMode.Force);
+		rb.AddRelativeForce(Physics.gravity, ForceMode.Force);
 		// Apply drag twice if there is no input so user slows faster.
 		if (sideSpeed == 0 && forwardSpeed == 0) rb.velocity *= decelerationFactor;
 	}
