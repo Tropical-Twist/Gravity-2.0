@@ -16,23 +16,22 @@ public class CharacterController : MonoBehaviour
 	private float jumpForce = 200.0f;
 	[SerializeField]
 	private float decelerationFactor = 0.8f;
-	private static readonly float jumpCooldown = 0.6f;
+	[SerializeField]
+	private float jumpCooldown = 0.1f;
+	[SerializeField]
+	private Transform hand;
 
-	//private Vector3 movement = Vector3.zero;
 	private Vector3 velocity = Vector3.zero;
 	private Vector3 force = Vector3.zero;
 	private float debugHighestSpeed = 0;
 
 	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
-
 	private Quaternion startRot;
 	private Quaternion endRot;
-
 	private float rotateTimer = 0.0f;
 	private float jumpTimer = 0.0f;
 	private float cutsceneTimer = 0.0f;
-
 	private Vector3 startPos;
 	private Vector3 endPos;
 
@@ -40,6 +39,7 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private Transform groundCheck;
 	[SerializeField] private Transform orientation;
 	private new Transform camera;
+	private LineRenderer lineRenderer;
 
 	private GravityObject selectedObject;
 
@@ -58,6 +58,8 @@ public class CharacterController : MonoBehaviour
 		rb.detectCollisions = true;
 
 		camera = Camera.main.transform;
+		lineRenderer = GetComponent<LineRenderer>();
+		lineRenderer.enabled = false;
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
@@ -113,9 +115,12 @@ public class CharacterController : MonoBehaviour
 		return Vector3.zero;
 	}
 
+	private bool wasShooting = false;
+	RaycastHit hit;
 	public void StandardMovement()
 	{
-		if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
+		//update Audio
+				if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
 		{
 			walking.Play();
 		}
@@ -124,12 +129,21 @@ public class CharacterController : MonoBehaviour
 			walking.Stop();
 		}
 
-		RaycastHit hit;
-		// Change gravity
-		if (PlayerStats.CanSetPlayerGravity && Input.GetButtonDown("Fire1") &&
+		// Show line
+		if (PlayerStats.CanSetPlayerGravity && Input.GetButton("Fire1") &&
 			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
 		{
-			AudioSource.PlayClipAtPoint(device_firing, transform.position, 0.3f);
+			wasShooting = true;
+			lineRenderer.enabled = true;
+			lineRenderer.SetPosition(0, hand.position);
+			lineRenderer.SetPosition(1, hit.point);
+		}
+		// Change gravity
+		else if (wasShooting)
+		{
+			if (hit.collider == null) Debug.Break(); // This is here because it will sometimes happen very rarely but it's hard to catch.
+			wasShooting = false;
+			lineRenderer.enabled = false;
 			Vector3 direction = GetGravityDirection(hit);
 			if (direction != Vector3.zero)
 			{
@@ -148,7 +162,9 @@ public class CharacterController : MonoBehaviour
 			AudioSource.PlayClipAtPoint(device_firing, transform.position, 0.3f);
 			if (hit.transform.tag == "Object")
 			{
+				if(selectedObject != null) { Camera.main.GetComponent<SelectionRaycaster>().Deselect(selectedObject.GetComponent<Outline>()); }
 				hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
+				selectedObject.GetComponent<Outline>().selected = true;
 			}
 			else if (selectedObject != null)
 			{
