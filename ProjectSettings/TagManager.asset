@@ -10,6 +10,7 @@ TagManager:
   - Anti-Ground
   - SFX
   - Background
+  - Music
   layers:
   - Default
   - TransparentFX

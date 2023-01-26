@@ -8,6 +8,11 @@ public class AudioLoader : MonoBehaviour
 	private AudioSource[] speakers;
 	private AudioSource sfx;
 	private AudioSource background;
+	private AudioSource music;
+
+	public AudioClip walkingGlass;
+	public AudioClip walkingMetal;
+	public AudioClip[] musicList;
 
 	private bool firstLoad = true;
 
@@ -35,6 +40,14 @@ public class AudioLoader : MonoBehaviour
 					firstLoad = false;
 					background.Play();
 				}
+			}
+
+			if (speaker.tag == "Music")
+			{
+				music = speaker;
+
+				music.clip = musicList[scene.buildIndex];
+				music.Play();
 			}
 		}
 	}

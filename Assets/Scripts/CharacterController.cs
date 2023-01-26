@@ -22,6 +22,10 @@ public class CharacterController : MonoBehaviour
 	private Transform hand;
 
 	private Vector3 velocity = Vector3.zero;
+	private Vector3 force = Vector3.zero;
+	private float debugHighestSpeed = 0;
+
+	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
 	private Quaternion startRot;
 	private Quaternion endRot;
@@ -39,6 +43,14 @@ public class CharacterController : MonoBehaviour
 
 	private GravityObject selectedObject;
 
+	[SerializeField] private AudioSource walking;
+	[SerializeField] private AudioSource landing;
+	[SerializeField] private AudioSource falling;
+	[SerializeField] private AudioClip device_firing;
+	[SerializeField] private AudioClip grav_change;
+
+	private AudioLoader audioLoader;
+
 	void Start()
 	{
 		rb = GetComponent<Rigidbody>();
@@ -51,6 +63,8 @@ public class CharacterController : MonoBehaviour
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
+
+		audioLoader = FindObjectOfType<AudioLoader>();
 	}
 
 	void FixedUpdate()
@@ -70,6 +84,18 @@ public class CharacterController : MonoBehaviour
 			//tranform.LookAt()? 
 			transform.rotation = Quaternion.Slerp(endRot, startRot, Mathf.Max(rotateTimer, 0.0f));
 		}
+
+		if (!grounded && !falling.isPlaying)
+		{
+			falling.Play();
+		}
+		else if (grounded)
+		{
+			falling.Stop();
+		}
+
+		force = Vector3.zero;
+		//movement = Vector3.zero;
 	}
 
 	public Vector3 GetGravityDirection(RaycastHit hit)
@@ -93,6 +119,16 @@ public class CharacterController : MonoBehaviour
 	RaycastHit hit;
 	public void StandardMovement()
 	{
+		//update Audio
+				if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
+		{
+			walking.Play();
+		}
+		else if (!grounded || rb.velocity.sqrMagnitude == 0.0f)
+		{
+			walking.Stop();
+		}
+
 		// Show line
 		if (PlayerStats.CanSetPlayerGravity && Input.GetButton("Fire1") &&
 			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
@@ -111,6 +147,7 @@ public class CharacterController : MonoBehaviour
 			Vector3 direction = GetGravityDirection(hit);
 			if (direction != Vector3.zero)
 			{
+				AudioSource.PlayClipAtPoint(grav_change, transform.position, 1.0f);
 				//gravityDirection = direction;
 				startRot = transform.rotation;
 				endRot = Quaternion.FromToRotation(Vector3.up, -direction);
@@ -122,6 +159,7 @@ public class CharacterController : MonoBehaviour
 		if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
 			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall", "Object")))
 		{
+			AudioSource.PlayClipAtPoint(device_firing, transform.position, 0.3f);
 			if (hit.transform.tag == "Object")
 			{
 				if(selectedObject != null) { Camera.main.GetComponent<SelectionRaycaster>().Deselect(selectedObject.GetComponent<Outline>()); }
@@ -197,5 +235,24 @@ public class CharacterController : MonoBehaviour
 		//endCamY = Quaternion.Euler(Vector3.up * camY);
 
 		cutsceneTimer = cutsceneTime;
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		Ray ray = new Ray(transform.position, -transform.up);
+		if (collision.collider.bounds.IntersectRay(ray))
+		{
+			if (collision.gameObject.tag == "Glass")
+			{
+				walking.clip = audioLoader.walkingGlass;
+				landing.clip = audioLoader.walkingGlass;
+			}
+			else
+			{
+				walking.clip = audioLoader.walkingMetal;
+				landing.clip = audioLoader.walkingMetal;
+			}
+			landing.PlayOneShot(landing.clip, Mathf.Lerp(0.275f, 0.325f, rb.velocity.magnitude) * 10.0f);
+		}
 	}
 }
