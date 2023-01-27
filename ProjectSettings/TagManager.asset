@@ -11,6 +11,7 @@ TagManager:
   - SFX
   - Background
   - Music
+  - Directional
   layers:
   - Default
   - TransparentFX
