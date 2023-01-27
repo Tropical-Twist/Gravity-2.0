@@ -107,12 +107,23 @@ public class CharacterController : MonoBehaviour
 			case "Mirror-Ground":
 				Physics.Raycast(hit.transform.position, hit.transform.forward, out RaycastHit newHit, Mathf.Infinity, LayerMask.GetMask("Ground"));
 				return GetGravityDirection(newHit);
-			case "Glass": return Vector3.zero;
-			case "Untagged": return Vector3.zero;
+			case "Glass": return Vector3.one;
+			//case "Anti-Gravity": return Vector3.zero; Not currently possible
+			case "Directional":
+				switch (hit.transform.gameObject.GetComponent<DirectionalWall>().direction)
+				{
+					case DirectionalWall.Direction.UP: return Vector3.up;
+					case DirectionalWall.Direction.DOWN: return Vector3.down;
+					case DirectionalWall.Direction.NORTH: return Vector3.forward;
+					case DirectionalWall.Direction.SOUTH: return Vector3.back;
+					case DirectionalWall.Direction.EAST: return Vector3.right;
+					case DirectionalWall.Direction.WEST: return Vector3.left;
+				} break;
+			case "Untagged": return Vector3.one;
 		}
 
 		Debug.LogError($"Unkown ground type: {hit.transform.tag}");
-		return Vector3.zero;
+		return Vector3.one;
 	}
 
 	private bool wasShooting = false;
@@ -145,7 +156,8 @@ public class CharacterController : MonoBehaviour
 			wasShooting = false;
 			lineRenderer.enabled = false;
 			Vector3 direction = GetGravityDirection(hit);
-			if (direction != Vector3.zero)
+
+			if (direction != Vector3.one)
 			{
 				AudioSource.PlayClipAtPoint(grav_change, transform.position, 1.0f);
 				//gravityDirection = direction;
