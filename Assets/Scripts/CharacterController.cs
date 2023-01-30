@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(Rigidbody))]
@@ -62,6 +63,8 @@ public class CharacterController : MonoBehaviour
 		Cursor.visible = false;
 
 		audioLoader = FindObjectOfType<AudioLoader>();
+
+		if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName("Level0")) transform.root.GetChild(0).GetChild(0).gameObject.SetActive(false);
 	}
 
 	void FixedUpdate()
