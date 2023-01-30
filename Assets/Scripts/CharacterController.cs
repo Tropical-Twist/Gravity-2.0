@@ -7,11 +7,11 @@ using UnityEngine;
 public class CharacterController : MonoBehaviour
 {
 	[SerializeField]
+	private TMPro.TMP_Text debugText;
+	[SerializeField]
 	private float walkAcceleration = 400.0f;
 	[SerializeField]
 	private float runAcceleration = 600.0f;
-	[SerializeField]
-	private float lateralVelocityLimit = 1.0f;
 	[SerializeField]
 	private float jumpForce = 200.0f;
 	[SerializeField]
@@ -22,10 +22,7 @@ public class CharacterController : MonoBehaviour
 	private Transform hand;
 
 	private Vector3 velocity = Vector3.zero;
-	private Vector3 force = Vector3.zero;
-	private float debugHighestSpeed = 0;
 
-	private Vector3 gravityDirection = Vector3.down;
 	private bool grounded = false;
 	private Quaternion startRot;
 	private Quaternion endRot;
@@ -93,9 +90,6 @@ public class CharacterController : MonoBehaviour
 		{
 			falling.Stop();
 		}
-
-		force = Vector3.zero;
-		//movement = Vector3.zero;
 	}
 
 	public Vector3 GetGravityDirection(RaycastHit hit)
@@ -118,7 +112,8 @@ public class CharacterController : MonoBehaviour
 					case DirectionalWall.Direction.SOUTH: return Vector3.back;
 					case DirectionalWall.Direction.EAST: return Vector3.right;
 					case DirectionalWall.Direction.WEST: return Vector3.left;
-				} break;
+				}
+				break;
 			case "Untagged": return Vector3.one;
 		}
 
@@ -127,11 +122,10 @@ public class CharacterController : MonoBehaviour
 	}
 
 	private bool wasShooting = false;
-	RaycastHit hit;
 	public void StandardMovement()
 	{
 		//update Audio
-				if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
+		if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
 		{
 			walking.Play();
 		}
@@ -141,8 +135,8 @@ public class CharacterController : MonoBehaviour
 		}
 
 		// Show line
-		if (PlayerStats.CanSetPlayerGravity && Input.GetButton("Fire1") &&
-			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall")))
+		Physics.Raycast(camera.position, camera.forward, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Wall"));
+		if (PlayerStats.CanSetPlayerGravity && Input.GetButton("Fire1") && hit.collider != null)
 		{
 			wasShooting = true;
 			lineRenderer.enabled = true;
@@ -174,7 +168,7 @@ public class CharacterController : MonoBehaviour
 			AudioSource.PlayClipAtPoint(device_firing, transform.position, 0.3f);
 			if (hit.transform.tag == "Object")
 			{
-				if(selectedObject != null) { Camera.main.GetComponent<SelectionRaycaster>().Deselect(selectedObject.GetComponent<Outline>()); }
+				if (selectedObject != null) { Camera.main.GetComponent<SelectionRaycaster>().Deselect(selectedObject.GetComponent<Outline>()); }
 				hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
 				selectedObject.GetComponent<Outline>().selected = true;
 			}
@@ -195,7 +189,7 @@ public class CharacterController : MonoBehaviour
 			jumpTimer = jumpCooldown;
 		}
 
-		// Speed is calculated whether or not player is sprinting.
+		// Sprint
 		float acceleration;
 		if (Input.GetKey(KeyCode.LeftShift)) { acceleration = runAcceleration; }
 		else { acceleration = walkAcceleration; }
@@ -208,8 +202,12 @@ public class CharacterController : MonoBehaviour
 
 		// Gravity
 		rb.AddRelativeForce(Physics.gravity, ForceMode.Force);
-		// Apply drag twice if there is no input so user slows faster.
-		if (sideSpeed == 0 && forwardSpeed == 0) rb.velocity *= decelerationFactor;
+
+		// Apply more drag if there is no input so user slows faster.
+		if (Mathf.Abs(sideSpeed) < float.Epsilon && Mathf.Abs(forwardSpeed) < float.Epsilon && grounded)
+		{
+			rb.velocity *= decelerationFactor;
+		}
 	}
 
 	public void CutsceneMovement()
