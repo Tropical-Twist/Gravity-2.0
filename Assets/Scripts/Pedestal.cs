@@ -9,11 +9,12 @@ public class Pedestal : MonoBehaviour
 
 	private void Update()
 	{
-		if (model != null) { model.transform.position += Vector3.up * Mathf.Sin(Time.time) * 0.005f; }
+		if (model != null) { model.transform.position += Vector3.up * Mathf.Sin(Time.time) * 0.002f; }
 	}
 
 	private void OnTriggerEnter(Collider other)
 	{
+		if (unlockID == 0) FindObjectOfType<CharacterController>().transform.root.GetChild(0).GetChild(0).gameObject.SetActive(true);
 		PlayerStats.Unlock(unlockID);
 		Destroy(model);
 		StartCoroutine(Sink());
