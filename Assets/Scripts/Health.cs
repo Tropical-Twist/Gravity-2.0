@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Health : MonoBehaviour
@@ -35,7 +36,7 @@ public class Health : MonoBehaviour
 		private set
 		{
 			value = Mathf.Min(maxValue, Mathf.Max(value, 0));
-			if (value == 0 && health != 0) onDeath.Invoke();
+			if (value == 0 && health != 0) SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 			if (value == maxValue && health != maxValue) onMaxHealth.Invoke();
 			if (value != health)
 			{
