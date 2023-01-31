@@ -37,9 +37,15 @@ public class CharacterController : MonoBehaviour
 	[SerializeField] private Transform groundCheck;
 	[SerializeField] private Transform orientation;
 	private new Transform camera;
-	private LineRenderer lineRenderer;
+	[SerializeField]
+	private LineRenderer playerGravityRay;
+	[SerializeField]
+	private LineRenderer objectGravityRay;
 
 	private GravityObject selectedObject;
+
+	private bool wasShootingPlayerRay = false;
+	private bool wasShootingObjectRay = false;
 
 	[SerializeField] private AudioSource walking;
 	[SerializeField] private AudioSource landing;
@@ -56,8 +62,9 @@ public class CharacterController : MonoBehaviour
 		rb.detectCollisions = true;
 
 		camera = Camera.main.transform;
-		lineRenderer = GetComponent<LineRenderer>();
-		lineRenderer.enabled = false;
+		//playerGravityRay = GetComponent<LineRenderer>();
+		playerGravityRay.enabled = false;
+		objectGravityRay.enabled = false;
 
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
@@ -124,7 +131,6 @@ public class CharacterController : MonoBehaviour
 		return Vector3.one;
 	}
 
-	private bool wasShooting = false;
 	public void StandardMovement()
 	{
 		//update Audio
@@ -141,17 +147,16 @@ public class CharacterController : MonoBehaviour
 		Physics.Raycast(camera.position, camera.forward, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Wall"));
 		if (PlayerStats.CanSetPlayerGravity && Input.GetButton("Fire1") && hit.collider != null)
 		{
-			wasShooting = true;
-			lineRenderer.enabled = true;
-			lineRenderer.SetPosition(0, hand.position);
-			lineRenderer.SetPosition(1, hit.point);
+			wasShootingPlayerRay = true;
+			playerGravityRay.enabled = true;
+			playerGravityRay.SetPosition(0, hand.position);
+			playerGravityRay.SetPosition(1, hit.point);
 		}
 		// Change gravity
-		else if (wasShooting)
+		else if (wasShootingPlayerRay)
 		{
-			if (hit.collider == null) Debug.Break(); // This is here because it will sometimes happen very rarely but it's hard to catch.
-			wasShooting = false;
-			lineRenderer.enabled = false;
+			wasShootingPlayerRay = false;
+			playerGravityRay.enabled = false;
 			Vector3 direction = GetGravityDirection(hit);
 
 			if (direction != Vector3.one)
@@ -165,14 +170,23 @@ public class CharacterController : MonoBehaviour
 		}
 
 		// Change an object's gravity
-		if (PlayerStats.CanSetObjectGravity && Input.GetButtonDown("Fire2") &&
-			Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall", "Object")))
+		Physics.Raycast(camera.position, camera.forward, out hit, Mathf.Infinity, LayerMask.GetMask("Wall", "Object"));
+		if (PlayerStats.CanSetObjectGravity && Input.GetButton("Fire2") && hit.collider != null)
 		{
+			wasShootingObjectRay = true;
+			objectGravityRay.enabled = true;
+			objectGravityRay.SetPosition(0, hand.position);
+			objectGravityRay.SetPosition(1, hit.point);
+		}
+		else if (wasShootingObjectRay)
+		{
+			wasShootingObjectRay = false;
+			objectGravityRay.enabled = false;
 			AudioSource.PlayClipAtPoint(device_firing, transform.position, 0.3f);
-			if (hit.transform.tag == "Object")
+			if (hit.transform.CompareTag("Object"))
 			{
 				if (selectedObject != null) { Camera.main.GetComponent<SelectionRaycaster>().Deselect(selectedObject.GetComponent<Outline>()); }
-				hit.transform.gameObject.TryGetComponent<GravityObject>(out selectedObject);
+				hit.transform.gameObject.TryGetComponent(out selectedObject);
 				selectedObject.GetComponent<Outline>().selected = true;
 			}
 			else if (selectedObject != null)

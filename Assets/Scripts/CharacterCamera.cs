@@ -10,16 +10,10 @@ public class CharacterCamera : MonoBehaviour
 	private Transform player;
 	private Quaternion center;
 
-	private static Quaternion camRotX;
-	private static Quaternion camRotY;
-
 	private void Awake()
 	{
 		player = transform.parent;
 		center = Quaternion.identity;
-
-		transform.localRotation = camRotX;
-		player.localRotation = camRotY;
 	}
 
 	void FixedUpdate()
@@ -32,8 +26,5 @@ public class CharacterCamera : MonoBehaviour
 			Quaternion yQuat = transform.localRotation * Quaternion.Euler(-mouseY, 0.0f, 0.0f);
 			if (Quaternion.Angle(center, yQuat) < MAX_ANGLE) { transform.localRotation = yQuat; }
 		}
-
-		camRotX = transform.localRotation;
-		camRotY = player.localRotation;
 	}
 }
