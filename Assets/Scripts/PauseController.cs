@@ -8,8 +8,8 @@ using UnityEngine.SceneManagement;
 public class PauseController : MonoBehaviour
 {
     [SerializeField] GameObject pauseMenu;
-/*    [SerializeField] Transform cameraRotation;
-    [SerializeField] Transform camera1;
+    //[SerializeField] Transform cameraRotation;
+/*    [SerializeField] Transform camera1;
     [SerializeField] Transform camera2;
     [SerializeField] Transform player;*/
 
@@ -59,14 +59,19 @@ public class PauseController : MonoBehaviour
 
     public void ToRetry()
     {
-/*        camera1.localRotation = cameraRotation.localRotation;
-        camera2.localRotation = cameraRotation.localRotation;
-        player.localRotation = cameraRotation.localRotation;*/
+        /*        camera1.localRotation = cameraRotation.localRotation;
+                camera2.localRotation = cameraRotation.localRotation;
+                player.localRotation = cameraRotation.localRotation;*/
+        Time.timeScale = 1;
+
+/*        player.rotation = Quaternion.identity;
+        camera1.localRotation = Quaternion.identity;
+        camera2.localRotation = Quaternion.identity;*/
 
         //camera rotation does not reset
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
+        
 
-        Time.timeScale = 1;
     }
 }
