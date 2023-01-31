@@ -148,7 +148,7 @@ PrefabInstance:
     - target: {fileID: 5019114648401624108, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.629999
+      value: 4.812
       objectReference: {fileID: 0}
     - target: {fileID: 5019114648401624108, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
@@ -198,7 +198,8 @@ PrefabInstance:
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_text
-      value: Watch out for the Lava
+      value: Watch out for the Lava, I hear its a pain to get out of the mandated
+        clothing.
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f91b20592fb7b643bb47e64ee62fea1, type: 3}
@@ -2788,7 +2789,7 @@ PrefabInstance:
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_text
-      value: I forgot what was put here, why don't you find out?
+      value: I forgot what was put here, why don't you find out, I'm sure it's safe...
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f91b20592fb7b643bb47e64ee62fea1, type: 3}
@@ -4291,7 +4292,8 @@ PrefabInstance:
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_text
-      value: Oh yeah, spikes... Well you're at the end at least...
+      value: Oh yeah, spikes... Well you're at the end of this experiment, onto the
+        next one.
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f91b20592fb7b643bb47e64ee62fea1, type: 3}
@@ -6662,7 +6664,7 @@ PrefabInstance:
     - target: {fileID: 4375466824200852431, guid: bdd872f86584c464a963fb8a64bfadd8,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 4375466824200852431, guid: bdd872f86584c464a963fb8a64bfadd8,
         type: 3}
@@ -6672,7 +6674,7 @@ PrefabInstance:
     - target: {fileID: 4375466824200852431, guid: bdd872f86584c464a963fb8a64bfadd8,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 4375466824200852431, guid: bdd872f86584c464a963fb8a64bfadd8,
         type: 3}
@@ -6687,7 +6689,7 @@ PrefabInstance:
     - target: {fileID: 4375466824200852431, guid: bdd872f86584c464a963fb8a64bfadd8,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 4375466824200852431, guid: bdd872f86584c464a963fb8a64bfadd8,
         type: 3}
