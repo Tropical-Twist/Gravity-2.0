@@ -224,7 +224,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unlockID: 0
-  model: {fileID: 6027401672745852390}
+  model: {fileID: 8254954902549014729}
 --- !u!1001 &5648514591399228340
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -317,6 +317,12 @@ PrefabInstance:
 --- !u!4 &5257042597351102853 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 474930180683704881, guid: 5d08ade7234600f4bad31083cb4100b1,
+    type: 3}
+  m_PrefabInstance: {fileID: 5648514591399228340}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8254954902549014729 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4390151636635065213, guid: 5d08ade7234600f4bad31083cb4100b1,
     type: 3}
   m_PrefabInstance: {fileID: 5648514591399228340}
   m_PrefabAsset: {fileID: 0}

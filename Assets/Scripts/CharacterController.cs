@@ -128,11 +128,11 @@ public class CharacterController : MonoBehaviour
 	public void StandardMovement()
 	{
 		//update Audio
-		if (grounded && rb.velocity.sqrMagnitude > 0.0f && !walking.isPlaying)
+		if (grounded && rb.velocity.sqrMagnitude > 0.1f && !walking.isPlaying)
 		{
 			walking.Play();
 		}
-		else if (!grounded || rb.velocity.sqrMagnitude == 0.0f)
+		else if (!grounded || rb.velocity.sqrMagnitude <= 0.1f)
 		{
 			walking.Stop();
 		}
