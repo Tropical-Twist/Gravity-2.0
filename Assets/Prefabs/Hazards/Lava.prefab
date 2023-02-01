@@ -379,4 +379,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instantKill: 0
-  damagePerSecond: 1
+  damagePerSecond: 33

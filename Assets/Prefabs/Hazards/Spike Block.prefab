@@ -385,7 +385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instantKill: 0
-  damagePerSecond: 1
+  damagePerSecond: 10
 --- !u!1001 &1818875681908295036
 PrefabInstance:
   m_ObjectHideFlags: 0
