@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -198,7 +198,7 @@ PrefabInstance:
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_text
-      value: Watch out for the Lava, I hear its a pain to get out of the mandated
+      value: Watch out for the Lava, I hear it's a pain to get out of the mandated
         clothing.
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -2561,6 +2561,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 90135849}
     m_Modifications:
+    - target: {fileID: 2921672912670980260, guid: 8f457bde4374f544fb946e1a43c9b70b,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2921672912670980260, guid: 8f457bde4374f544fb946e1a43c9b70b,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5863532994951377302, guid: 8f457bde4374f544fb946e1a43c9b70b,
         type: 3}
       propertyPath: m_RootOrder

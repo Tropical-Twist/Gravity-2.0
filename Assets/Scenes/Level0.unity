@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -197,10 +197,10 @@ PrefabInstance:
       value: 'This is the Gravity Gun
 
 
-        Right Click to Aim
+        Hold Left Click to Aim
 
-        Left
-        Click to Shoot'
+        Release
+        to Shoot'
       objectReference: {fileID: 0}
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
@@ -1961,6 +1961,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 830454063}
     m_Modifications:
+    - target: {fileID: 2921672912670980260, guid: 8f457bde4374f544fb946e1a43c9b70b,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2921672912670980260, guid: 8f457bde4374f544fb946e1a43c9b70b,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5863532994407376316, guid: 8f457bde4374f544fb946e1a43c9b70b,
         type: 3}
       propertyPath: m_LocalRotation.w
@@ -2359,7 +2369,7 @@ PrefabInstance:
     - target: {fileID: 4636546359639165437, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0.123
+      value: -0.078
       objectReference: {fileID: 0}
     - target: {fileID: 5019114648401624108, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
@@ -2419,7 +2429,7 @@ PrefabInstance:
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_text
-      value: '  W
+      value: 'W
 
         ASD'
       objectReference: {fileID: 0}
@@ -2464,6 +2474,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4278190080
+      objectReference: {fileID: 0}
+    - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f91b20592fb7b643bb47e64ee62fea1, type: 3}
@@ -3584,7 +3599,7 @@ PrefabInstance:
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
       propertyPath: m_text
-      value: Black walls sets gravity to reverse
+      value: Black walls set gravity to reverse
       objectReference: {fileID: 0}
     - target: {fileID: 5192792967918619375, guid: 2f91b20592fb7b643bb47e64ee62fea1,
         type: 3}
